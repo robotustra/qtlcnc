@@ -12,6 +12,7 @@ int main(int argc, char *argv[])
     MainWindow w;
 
     w.show();
+    w.set_ggeom(24,16);
 
     // load config
 
@@ -28,10 +29,9 @@ int main(int argc, char *argv[])
 
     QRect ws = a.desktop()->availableGeometry();
 
-    //mb.setText(QString (" The windows size ") + QString::number( ws.width() ) + "x" + QString::number( ws.height()) );
-    //mb.exec();
-
     int hdelta = qs.height() - ws.height(); // the sizes are different by the height of menu
+
+    w.set_layout_params(QPoint(10,18), 80);
 
     w.set_window_size(QSize(ws.width(), ws.height()), QPoint(0, -hdelta));
 
