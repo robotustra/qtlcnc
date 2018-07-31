@@ -341,6 +341,9 @@ bool MainWindow::is_sl_comment(QString& s){
     }
     return FALSE;
 }
+/*
+    Executing the word parsed.
+*/
 bool MainWindow::exec_word(QStringList& list, int& cs, LayoutData *ld){
     // cs points to the word to execute
     QString ts = list[cs];
