@@ -8,6 +8,15 @@
 #include <QPen>
 #include <QPixmap>
 #include <QWidget>
+#include "layoutdata.h"
+
+#ifndef TRUE
+#define TRUE true
+#endif
+
+#ifndef FALSE
+#define FALSE false
+#endif
 
 namespace Ui {
 class MainWindow;
@@ -30,6 +39,19 @@ public:
     int load_config(QString fname);
     void drawMesh();
     ~MainWindow();
+protected:
+    // parser functions
+    bool parse_list(QStringList& list, LayoutData* ld);
+    bool is_word(QString& s);
+    bool is_string(QString& s);
+    bool is_number(QString& s);
+    bool is_var(QString& s);
+    bool is_ml_comment_start(QString& s);
+    bool is_ml_comment_stop(QString& s);
+    bool is_sl_comment(QString& s);
+    bool is_unknown(QString& s);
+    bool exec_word(QStringList& list, int& cs, LayoutData *ld);
+
 
 protected:
     void paintEvent(QPaintEvent * e);
@@ -53,6 +75,8 @@ private:
     QPoint loffset; // The left top corner of the layout
     // ini file
     QString ini_file_str;
+    LayoutData* ld; // All screen layouts for this application
+    bool multiline_comment_on;
 
 };
 
