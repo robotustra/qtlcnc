@@ -3,6 +3,8 @@
 #include <QPixmap>
 #include <QDesktopWidget>
 #include <QPainter>
+#include <QDebug>
+#include <QFile>
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -148,4 +150,36 @@ void MainWindow::set_ggeom(int w, int h){
 void MainWindow::set_layout_params(QPoint p, int uc){
     loffset = p;
     ucell = uc;
+}
+
+int MainWindow::load_config(QString fname){
+    int res = -1;
+    if ( !fname.isEmpty() ){
+        qDebug()<< fname;
+        // parsing loayout configuration
+        QFile file(fname);
+        if (!file.open(QIODevice::ReadOnly))
+        {
+            perror("Can't open ini file to read");
+            return -1;
+        }
+        ini_file_str.clear();
+        bool okay = true;
+        // read all file
+        QStringList stringList;
+        stringList.clear();
+        QTextStream textStream(&file);
+        while (true)
+        {
+            QString line0 = textStream.readLine();
+            qDebug()<< line0;
+            if (line0.isNull())
+                break;
+            else
+                stringList.append(line0);
+        }
+        file.close();
+        res = 0; // set if everything is ok
+    }
+    return res;
 }

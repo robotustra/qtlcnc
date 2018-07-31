@@ -27,6 +27,7 @@ public:
     void set_window_size(QSize s, QPoint pt);
     void set_ggeom(int w, int h);
     void set_layout_params(QPoint p, int uc);
+    int load_config(QString fname);
     void drawMesh();
     ~MainWindow();
 
@@ -50,6 +51,8 @@ private:
     QSize ggeom;
     int ucell;      // The unit cell size in pixels
     QPoint loffset; // The left top corner of the layout
+    // ini file
+    QString ini_file_str;
 
 };
 

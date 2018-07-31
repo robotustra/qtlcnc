@@ -12,10 +12,21 @@ int main(int argc, char *argv[])
     MainWindow w;
 
     w.show();
+    QString fname = "";
+
+
+    if (argc == 2){
+        fname = argv[1];
+    }else{
+        fname = "../qtlcnc/qtlcnc_layouts.ini";
+    }
+    int r = w.load_config(fname);
+    if (r<0){
+        perror("Can't load any layout file of file is incorrect\n");
+        exit(1);
+    }
+
     w.set_ggeom(24,16);
-
-    // load config
-
 
     // determine screen size.
     QSize qs = w.get_screen_size();
