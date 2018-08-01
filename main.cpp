@@ -26,7 +26,10 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    w.set_ggeom(24,16);
+    int ucell = 80;
+    int nxcell = 18;
+    int nycell = 12;
+    w.set_ggeom(nxcell, nycell);
 
     // determine screen size.
     QSize qs = w.get_screen_size();
@@ -42,9 +45,13 @@ int main(int argc, char *argv[])
 
     int hdelta = qs.height() - ws.height(); // the sizes are different by the height of menu
 
-    w.set_layout_params(QPoint(10,18), 80);
+    w.set_layout_params(QPoint(2,18), ucell);
 
-    w.set_window_size(QSize(ws.width(), ws.height()), QPoint(0, -hdelta));
+    //w.set_window_size(QSize(ws.width(), ws.height()), QPoint(0, -hdelta));
+    int wds = nxcell * ucell;
+    int hds = nycell * ucell;
+    int status_bar = 38;
+    w.set_window_size(QSize(wds, hds+ status_bar), QPoint((ws.width()-wds)/2, (ws.height()-hds)/2));
 
     return a.exec();
 }

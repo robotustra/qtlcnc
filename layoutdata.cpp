@@ -2,7 +2,7 @@
 
 LayoutData::LayoutData(QString filename)
 {
-    fname = filename;
+    this->filename = filename;
 }
 
 
@@ -31,4 +31,9 @@ int LayoutData::is_var_exist(LayoutData* ld, QString var){
 
 void LayoutData::draw_layout(){
 
+}
+
+bool LayoutData::is_the_same_file(QString fn){
+    if (QString::compare(fn, filename, Qt::CaseSensitive) == 0) return TRUE;
+    return FALSE;
 }

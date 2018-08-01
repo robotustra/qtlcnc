@@ -51,6 +51,10 @@ protected:
     bool is_sl_comment(QString& s);
     bool is_unknown(QString& s);
     bool exec_word(QStringList& list, int& cs, LayoutData *ld);
+    int  get_int_value(QStringList& list, int& cs, LayoutData *dl);
+    float get_float_value(QStringList& list, int& cs, LayoutData *dl);
+
+    bool exec_IVAR(QStringList& list, int& cs, LayoutData *dl);
 
 
 protected:
@@ -77,6 +81,7 @@ private:
     QString ini_file_str;
     LayoutData* ld; // All screen layouts for this application
     bool multiline_comment_on;
+    bool is_updating;
 
 };
 

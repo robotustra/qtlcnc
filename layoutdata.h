@@ -4,14 +4,18 @@
 #include <QString>
 #include <QPoint>
 #include <QRect>
+#include <QMatrix4x4>
 #include "state.h"
 //#include <QtOpenGL/QtOpenGL> not ready for GL yet
 
 #include <vector>
-//#include "glmesh.h"
-//#include "backdrop.h"
-//#include "mesh.h"
-//#include "lcs.h"
+#include "glmesh.h"
+#include "backdrop.h"
+#include "mesh.h"
+#include "lcs.h"
+#include "mybutton.h"
+#include "myindicator.h"
+#include "simplelayout.h"
 
 /*
 *   This layout data contains all objects are needed to build qtlcnc layouts.
@@ -54,6 +58,7 @@ public:
     void print_layout();
     int is_var_exist(LayoutData* ar, QString var);
     void draw_layout(); // draw current layout according to the current state.
+    bool is_the_same_file(QString fn);
 
 protected:
 
@@ -76,15 +81,12 @@ protected:
     std::vector<QPoint> var_ivec2;  // 2dim vector of 2 ints
     std::vector<State*> var_state;  // A structure which represents the single state of any layout object, may include a bunch of properties.
     std::vector<MyButton*> var_mybutton; // layout object
-    LABEL,  // text lable
-    LIND,   // linear indicator
-    KNOB,   // knob
-    LAYOUT,
+    std::vector<MyButton*> var_label;    // text lable is saved in the class button
+    std::vector<MyIndicator*> var_indicator;    // linear indicator
+    std::vector<MyIndicator*> var_knob;   // knob
+    std::vector<SimpleLayout*> var_slayout; // one screen layout
 
     QMatrix4x4 view_matrix() const; // We have only one view matrix
-
-    // Background
-    Backdrop* backdrop;
 
     float scale;
     float zoom;
@@ -92,23 +94,13 @@ protected:
     float yaw;
 
     float perspective;
-    //Q_PROPERTY(float perspective WRITE set_perspective);
-    QPropertyAnimation anim;
 
     QPoint mouse_pos;
     QString status;
     QString filename;
-    QString file_content;
     bool is_parsing;
-    bool is_transformed;
 
-    friend class ArenaLoader;
-    friend class Canvas;
-    friend class PoseCapture;
-    friend class PoseEditDlg;
-    friend class Window;
-
-
+    friend class MainWindow;
 };
 
 #endif // LAYOUTDATA_H

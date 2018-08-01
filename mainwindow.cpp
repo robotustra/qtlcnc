@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QDebug>
 #include <QFile>
+#include "layoutdata.h"
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -14,6 +15,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ggeom.setWidth(0);
     ggeom.setHeight(0);
+    multiline_comment_on = FALSE;
+    is_updating = FALSE;
+    ld = NULL;
 }
 
 MainWindow::~MainWindow()
@@ -145,8 +149,26 @@ void MainWindow::set_layout_params(QPoint p, int uc){
 
 int MainWindow::load_config(QString fname){
     int res = -1;
+    LayoutData * ld = NULL;
+    if (this->ld != NULL && this->ld->is_the_same_file(fname)) {
+        qDebug() << "already have layout, reloading ";
+        is_updating = true;
+        ld = this->ld;
+
+    }else{
+        qDebug() << "new file";
+        // loading layout first time
+        if (this->ld != NULL) delete ld; //if we are here - the file is new
+        is_updating = false;
+        ld = new LayoutData(fname);
+        //qDebug() << "new layoutdata =" << ld;
+    }
+    if (ld->is_parsing){ return NULL;}
+    ld->is_parsing = true;
+    // if the nile name of layout is different from this one - it should be reloaded
+    // completely.
     if ( !fname.isEmpty() ){
-        qDebug()<< fname;
+        //qDebug()<< fname;
         // parsing loayout configuration
         QFile file(fname);
         if (!file.open(QIODevice::ReadOnly))
@@ -163,7 +185,7 @@ int MainWindow::load_config(QString fname){
         while (true)
         {
             QString line0 = textStream.readLine();
-            qDebug()<< line0;
+            //qDebug()<< line0;
             if (line0.isNull())
                 break;
             else
@@ -171,17 +193,18 @@ int MainWindow::load_config(QString fname){
         }
         file.close();
         res = 0;
+        qDebug()<< "size of list = " << stringList.size();
         for (int i=0; i<stringList.size(); ++i)
         {
             QString str = stringList[i];
             if (str.isEmpty()) continue;
-            auto fs = str[0];
+            char fs = str[0].toAscii();
             // Parsing file line by line.
-            if (fs == "#"){
+            if (fs == '#'){
                continue; // skip comment line
             }
             else
-            if (fs != "\r" && fs != "\n"){
+            if (fs != '\r' && fs != '\n'){
                 // string to get,
                 QString line = stringList[i].trimmed();
                 //qDebug() << line;
@@ -212,7 +235,7 @@ int MainWindow::load_config(QString fname){
 */
 bool MainWindow::parse_list(QStringList& list, LayoutData* ld){
     int cs = 0; //position
-    //qDebug() << list;
+    qDebug() << list;
     // put string in the stack,
     // put variable in the stack
     // execute command
@@ -220,7 +243,7 @@ bool MainWindow::parse_list(QStringList& list, LayoutData* ld){
     int i =0;
     while (i<list.size()){
         QString ts = list[i];
-        //qDebug() << ts;
+        qDebug() << ts;
         if (!multiline_comment_on && is_sl_comment(ts)){
             //qDebug()<< "single line comment";
             list.clear();
@@ -239,10 +262,12 @@ bool MainWindow::parse_list(QStringList& list, LayoutData* ld){
         }
         else if (!multiline_comment_on && is_number(ts))
         {
+            //qDebug()<< "number found =" << ts << "\n";
             cs++;
         }
         else if (!multiline_comment_on && is_var(ts))
         {
+            qDebug()<< "var found =" << ts << "\n";
             cs++;
         }
         else if (is_ml_comment_start(ts)){
@@ -281,7 +306,8 @@ std::string key_words[] = {
         "SETO",
         "HIDE",
         "SHOW",
-        "NEST"
+        "NEST",
+        "IVAR"
     };
 
     for (uint i=0; i< (sizeof(key_words)/sizeof(key_words[0])); i++){
@@ -428,6 +454,83 @@ bool MainWindow::exec_word(QStringList& list, int& cs, LayoutData *ld){
         //qDebug() << "after cs=" <<cs;
         return ok;
     }*/
+    if(QString::compare( ts, "IVAR", Qt::CaseInsensitive) == 0){ // a number
+        qDebug() << "IVAR found";
+        //qDebug() << "before cs=" <<cs;
+        ok = exec_IVAR(list, cs, ld);
+        //qDebug() << "after cs=" <<cs;
+        return ok;
+    }
     // some other words to add in this parser
     return ok; //FALSE by default
 }
+
+bool MainWindow::exec_IVAR(QStringList& list, int& cs, LayoutData *dl){
+    list.removeAt(cs); cs--; //remove "IVAR" keyword
+    QString var = list.takeAt(cs); cs--;
+    int v_idx = dl->is_var_exist(dl, var);
+    if (-1 == v_idx ){
+        dl->var_name.push_back(var);
+        dl->var_type.push_back(INT);
+    }else{
+        if (!is_updating) {
+            qDebug() << "ivar " << var << " exists, fix input file.";
+            return FALSE;
+        }else{
+            // just update the value in arena
+            int fnum = get_int_value(list, cs, dl);
+            dl->var_int_number[dl->val_index[v_idx]] = fnum;
+            //qDebug() << "number is updated: " << fnum ;
+            return TRUE;
+        }
+    }
+    int fnum = get_int_value(list, cs, dl);
+    dl->val_index.push_back(dl->var_int_number.size());
+    dl->var_number.push_back(fnum); //file name
+    dl->var_number_modified_flag.push_back(false); // variable is not modified.
+
+    //qDebug() << "number is loaded :" << fnum ;
+    return TRUE;
+}
+
+float MainWindow::get_float_value(QStringList& list, int& cs, LayoutData *dl){
+    QString sv = list.takeAt(0);
+    bool ok = FALSE;
+    float v = QString(sv).toFloat(&ok);
+    if (ok == TRUE) return v;
+    else {
+        int val_idx=dl->is_var_exist(dl, sv);
+        if ( val_idx >= 0 ){ // have variable
+            if (dl->var_type[val_idx] == DUBL){
+                //qDebug() << "got number" << ar->var_number[ar->val_index[val_idx]];
+                return dl->var_number[dl->val_index[val_idx]];
+            }
+        }else{
+            qDebug() << "error, variable " << sv << " does not exist, fix the config file";
+            return 0.0;
+        }
+    }
+    return 0.0;
+}
+
+int MainWindow::get_int_value(QStringList& list, int& cs, LayoutData *dl){
+    QString sv = list.takeAt(0);
+    bool ok = FALSE;
+    int v = QString(sv).toInt(&ok);
+    if (ok == TRUE) return v;
+    else {
+        int val_idx = dl->is_var_exist(dl, sv);
+        if ( val_idx >= 0 ){ // have variable
+            if (dl->var_type[val_idx] == INT){
+                //qDebug() << "got number" << ar->var_number[ar->val_index[val_idx]];
+                return dl->var_number[dl->val_index[val_idx]];
+            }
+        }else{
+            qDebug() << "error, variable " << sv << " does not exist, fix the config file";
+            return 0;
+        }
+    }
+    return 0;
+}
+
+
