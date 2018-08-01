@@ -39,8 +39,7 @@ enum BASE_TYPES
     LCS_TYPE,
     MAT,
     MAT4,
-    INT,    // defined as IVAR
-    GEOM,   // application screen geometry
+    INTN,    // defined as IVAR
     IVEC2,  // 2dim vector of 2 ints
     STATE,  // A structure which represents the single state of any layout object, may include a bunch of properties.
     BUTTON, // layout object
@@ -71,13 +70,13 @@ protected:
                                 // if it's STL - in mesh_arr, MAT4 ->transforms. For STL file we have 2 values, one if the file name and 2 is the
                                 // mesh, how to store it?
     std::vector<float> var_number;
-    std::vector<bool> var_number_modified_flag;
+    std::vector<bool> var_number_modified_flag; //doubles, floats
+    std::vector<bool> var_int_number_modified_flag; // ints
     std::vector<Mesh*> var_mesh_arr; // meshes, loaded from file.
     std::vector<Mesh*> var_mesh_arr_copy; // meshes, loaded from file.
     std::vector<LCS*> var_lcs;      // local coordinate system
     std::vector<QVector4D> var_quat;// quaternions
     std::vector<int> var_int_number;    // defined as IVAR
-    std::vector<QRect> var_geometry;    // application screen geometry
     std::vector<QPoint> var_ivec2;  // 2dim vector of 2 ints
     std::vector<State*> var_state;  // A structure which represents the single state of any layout object, may include a bunch of properties.
     std::vector<MyButton*> var_mybutton; // layout object

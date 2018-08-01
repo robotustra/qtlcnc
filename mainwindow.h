@@ -38,10 +38,12 @@ public:
     void set_layout_params(QPoint p, int uc);
     int load_config(QString fname);
     void drawMesh();
+    int get_int_value_from_data(QString var);
     ~MainWindow();
 protected:
     // parser functions
     bool parse_list(QStringList& list, LayoutData* ld);
+    bool parse_raw_string(QString &str, LayoutData* ld);
     bool is_word(QString& s);
     bool is_string(QString& s);
     bool is_number(QString& s);
@@ -55,6 +57,7 @@ protected:
     float get_float_value(QStringList& list, int& cs, LayoutData *dl);
 
     bool exec_IVAR(QStringList& list, int& cs, LayoutData *dl);
+    bool exec_IVEC2(QStringList& list, int& cs, LayoutData *dl);
 
 
 protected:

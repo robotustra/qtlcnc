@@ -161,6 +161,7 @@ int MainWindow::load_config(QString fname){
         if (this->ld != NULL) delete ld; //if we are here - the file is new
         is_updating = false;
         ld = new LayoutData(fname);
+        this->ld = ld;
         //qDebug() << "new layoutdata =" << ld;
     }
     if (ld->is_parsing){ return NULL;}
@@ -198,30 +199,48 @@ int MainWindow::load_config(QString fname){
         {
             QString str = stringList[i];
             if (str.isEmpty()) continue;
-            char fs = str[0].toAscii();
+            QChar fs = QChar(str[0]);
             // Parsing file line by line.
-            if (fs == '#'){
-               continue; // skip comment line
+            if (fs == QChar('#') ){
+                continue; // skip comment line
             }
             else
-            if (fs != '\r' && fs != '\n'){
+            if (fs != QChar('\r') && fs != QChar('\n') ){
                 // string to get,
                 QString line = stringList[i].trimmed();
-                //qDebug() << line;
-                QRegExp rx("[\t ]");// match tab or a space
-                //QString sline = line;
-                //qDebug() << "[" << sline << "]";
-                QStringList list = line.split(rx, QString::SkipEmptyParts);
-                //qDebug() << list;
-                ini_file_str += line + QString('\n');
-                // now we have line we just have to parse it.
-                okay = parse_list(list, ld);
-                if (!okay) {
-                    res = -1; break;
+                //look for '
+                int quote_idx = line.indexOf("'");
+                QStringList list;
+                if ( quote_idx >= 0){
+                    // there is quoted text,
+                    QString qstring = get line;
+                    QRegExp rx("[\t ]");// match tab or a space
+                    //QString sline = line;
+                    //qDebug() << "[" << sline << "]";
+                    list = line.split(rx, QString::SkipEmptyParts);
+                    //qDebug() << list;
+                    ini_file_str += line + QString('\n');
+                    // now we have line we just have to parse it.
+                    okay = parse_list(list, ld);
+                }else{
+                    // does not need special spliting
+                    //qDebug() << line;
+                    QRegExp rx("[\t ]");// match tab or a space
+                    //QString sline = line;
+                    //qDebug() << "[" << sline << "]";
+                    list = line.split(rx, QString::SkipEmptyParts);
+                    //qDebug() << list;
+                    ini_file_str += line + QString('\n');
+                    // now we have line we just have to parse it.
+                    okay = parse_list(list, ld);
                 }
+            }
+            if (!okay) {
+                res = -1; break;
             }
         }
     }
+    ld->is_parsing = false;
     return res;
 }
 
@@ -243,7 +262,7 @@ bool MainWindow::parse_list(QStringList& list, LayoutData* ld){
     int i =0;
     while (i<list.size()){
         QString ts = list[i];
-        qDebug() << ts;
+        //qDebug() << ts;
         if (!multiline_comment_on && is_sl_comment(ts)){
             //qDebug()<< "single line comment";
             list.clear();
@@ -267,7 +286,7 @@ bool MainWindow::parse_list(QStringList& list, LayoutData* ld){
         }
         else if (!multiline_comment_on && is_var(ts))
         {
-            qDebug()<< "var found =" << ts << "\n";
+            //qDebug()<< "var found =" << ts << "\n";
             cs++;
         }
         else if (is_ml_comment_start(ts)){
@@ -287,6 +306,105 @@ bool MainWindow::parse_list(QStringList& list, LayoutData* ld){
     }
     return ok;
 }
+//Get the next token even if it's a quoted and cut it from the rest of the string.
+QString MainWindow::get_next_quoted_token(QString& str){
+    qDebug() << str;
+    if (str.isEmpty() || str.isNull()) return NULL;
+    str.trimmed();
+    QChar fs = QChar(str[0]);
+    if (fs == QChar('\'') ){
+        // has quotes, looking for the next quote
+        int quote_offs = str.indexOf("' ", 1);
+        if (quote_offs > 0){
+            // have valid string (didn't check for quotes yet)
+            //take substring from str
+            QString lstr = str.left(quote_offs);
+            qDebug() << "[" << lstr << "]";
+            qDebug() << "{" << str << "}";
+            str.remove(0,quote_offs);
+            str.trimmed();
+            return lstr;
+        }
+    } else {
+        // look for the next space or tab of eol
+
+        if
+
+
+    }
+
+    return NULL;
+}
+bool MainWindow::parse_raw_string(QString& str, LayoutData* ld){
+    int cs = 0; //position
+    qDebug() << str;
+    bool ok = TRUE;
+    QStringList list;
+    // extract the content of the string and replace all escape characters
+    // remove the first '
+    str.remove(0,1); //remove '
+    // looking for the next '
+    int quote_offs = str.indexOf("' ");
+    if (quote_offs >= 0){
+        // have valid string (didn't check for quotes yet)
+        //take substring from str
+        QString lstr = str.left(quote_offs);
+        qDebug() << "[" << lstr << "]";
+        qDebug() << "{" << str << "}";
+        list.push_back(lstr);
+        cs++;
+    }
+    /*
+    int i =0;
+    while (i<list.size()){
+        QString ts = list[i];
+        //qDebug() << ts;
+        if (!multiline_comment_on && is_sl_comment(ts)){
+            //qDebug()<< "single line comment";
+            list.clear();
+            return TRUE;
+        } else
+        if (!multiline_comment_on && is_string(ts)){
+            ts.remove("\"");
+            //qDebug() << "type string:" << ts;
+            cs++;
+        }
+        else if (!multiline_comment_on && is_word(ts))
+        {
+            //qDebug() << "this is a word, executing";
+            ok = exec_word(list, cs, ld);
+            list.clear();
+        }
+        else if (!multiline_comment_on && is_number(ts))
+        {
+            //qDebug()<< "number found =" << ts << "\n";
+            cs++;
+        }
+        else if (!multiline_comment_on && is_var(ts))
+        {
+            //qDebug()<< "var found =" << ts << "\n";
+            cs++;
+        }
+        else if (is_ml_comment_start(ts)){
+            multiline_comment_on = TRUE;
+            //qDebug()<< "multiline comment starts";
+        }
+        else if (is_ml_comment_stop(ts)){
+            multiline_comment_on = FALSE;
+            //qDebug()<< "multiline comment ends";
+        }
+        else if (!multiline_comment_on && is_unknown(ts)){
+            // parsing error, or # for comment. stop parsing
+            qDebug()<< "error or comment symbol";
+            return FALSE;
+        }
+        i++;
+    }
+    */
+    return ok;
+}
+
+
 bool MainWindow::is_word(QString& s){
 std::string key_words[] = {
         "STL",
@@ -307,7 +425,9 @@ std::string key_words[] = {
         "HIDE",
         "SHOW",
         "NEST",
-        "IVAR"
+        "IVAR",
+        "IVEC2",
+        "STRI"
     };
 
     for (uint i=0; i< (sizeof(key_words)/sizeof(key_words[0])); i++){
@@ -454,11 +574,16 @@ bool MainWindow::exec_word(QStringList& list, int& cs, LayoutData *ld){
         //qDebug() << "after cs=" <<cs;
         return ok;
     }*/
-    if(QString::compare( ts, "IVAR", Qt::CaseInsensitive) == 0){ // a number
+    if(QString::compare( ts, "IVAR", Qt::CaseInsensitive) == 0){ // an integer number
         qDebug() << "IVAR found";
         //qDebug() << "before cs=" <<cs;
         ok = exec_IVAR(list, cs, ld);
         //qDebug() << "after cs=" <<cs;
+        return ok;
+    }
+    if(QString::compare( ts, "IVEC2", Qt::CaseInsensitive) == 0){ // a int number 2d vector
+        qDebug() << "IVEC2 found";
+        ok = exec_IVEC2(list, cs, ld);
         return ok;
     }
     // some other words to add in this parser
@@ -471,13 +596,13 @@ bool MainWindow::exec_IVAR(QStringList& list, int& cs, LayoutData *dl){
     int v_idx = dl->is_var_exist(dl, var);
     if (-1 == v_idx ){
         dl->var_name.push_back(var);
-        dl->var_type.push_back(INT);
+        dl->var_type.push_back(INTN);
     }else{
         if (!is_updating) {
             qDebug() << "ivar " << var << " exists, fix input file.";
             return FALSE;
         }else{
-            // just update the value in arena
+            // just update the value in layout
             int fnum = get_int_value(list, cs, dl);
             dl->var_int_number[dl->val_index[v_idx]] = fnum;
             //qDebug() << "number is updated: " << fnum ;
@@ -486,12 +611,40 @@ bool MainWindow::exec_IVAR(QStringList& list, int& cs, LayoutData *dl){
     }
     int fnum = get_int_value(list, cs, dl);
     dl->val_index.push_back(dl->var_int_number.size());
-    dl->var_number.push_back(fnum); //file name
-    dl->var_number_modified_flag.push_back(false); // variable is not modified.
+    dl->var_int_number.push_back(fnum); //file name
+    dl->var_int_number_modified_flag.push_back(false); // variable is not modified.
 
     //qDebug() << "number is loaded :" << fnum ;
     return TRUE;
 }
+
+bool MainWindow::exec_IVEC2(QStringList& list, int& cs, LayoutData *dl){
+    list.removeAt(cs); cs--; //remove "IVEC" keyword
+    QString var = list.takeAt(cs); cs--; //variable name
+    int v_idx = dl->is_var_exist(dl, var);
+    if (-1 == v_idx ){
+        dl->var_name.push_back(var);
+        dl->var_type.push_back(IVEC2);
+    }else{
+        if (!is_updating) {
+            qDebug() << "ivec2 " << var << " exists, fix input file.";
+            return FALSE;
+        }else{
+            // just update the value in layout
+            int px = get_int_value(list, cs, dl); // takes value from the beginig
+            int py = get_int_value(list, cs, dl);
+            dl->var_ivec2[dl->val_index[v_idx]] = QPoint(px,py);
+            return TRUE;
+        }
+    }
+    int px = get_int_value(list, cs, dl); // takes value from the beginig
+    int py = get_int_value(list, cs, dl);
+    dl->val_index.push_back(dl->var_ivec2.size());
+    dl->var_ivec2.push_back(QPoint(px,py)); //file name
+    qDebug() << "ivec2 is added " << dl->var_ivec2[dl->var_ivec2.size()-1] ;
+    return TRUE;
+}
+
 
 float MainWindow::get_float_value(QStringList& list, int& cs, LayoutData *dl){
     QString sv = list.takeAt(0);
@@ -521,7 +674,7 @@ int MainWindow::get_int_value(QStringList& list, int& cs, LayoutData *dl){
     else {
         int val_idx = dl->is_var_exist(dl, sv);
         if ( val_idx >= 0 ){ // have variable
-            if (dl->var_type[val_idx] == INT){
+            if (dl->var_type[val_idx] == INTN){
                 //qDebug() << "got number" << ar->var_number[ar->val_index[val_idx]];
                 return dl->var_number[dl->val_index[val_idx]];
             }
@@ -532,5 +685,22 @@ int MainWindow::get_int_value(QStringList& list, int& cs, LayoutData *dl){
     }
     return 0;
 }
-
+/*
+    This function is an interface to get INT value from layout data by name
+*/
+int MainWindow::get_int_value_from_data(QString var){
+    int res = -999999999; //very big negative number.
+    //qDebug() << "ld =" << ld;
+    if (ld != NULL){
+        int v_idx = ld->is_var_exist(ld, var);
+        //qDebug() << "v_idx =" << v_idx;
+        if (-1 != v_idx ){
+             res = ld->var_int_number[ld->val_index[v_idx]];
+        }else{
+            qDebug()<< "variable name do not exist";
+            exit (-1);
+        }
+    }
+    return res;
+}
 
