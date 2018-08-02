@@ -277,7 +277,12 @@ bool MainWindow::parse_list(QStringList& list, LayoutData* ld){
         }
         else if (!multiline_comment_on && is_number(ts))
         {
-            //qDebug()<< "number found =" << ts << "\n";
+            qDebug()<< "number found =" << ts << "\n";
+            cs++;
+        }
+        else if (!multiline_comment_on && is_number_pair(ts))
+        {
+            qDebug()<< "number pair found =" << ts << "\n";
             cs++;
         }
         else if (!multiline_comment_on && is_var(ts))
@@ -365,7 +370,8 @@ std::string key_words[] = {
         "NEST",
         "IVAR",
         "IVEC2",
-        "STRI"
+        "STRI",
+        "PATH"
     };
 
     for (uint i=0; i< (sizeof(key_words)/sizeof(key_words[0])); i++){
@@ -407,7 +413,17 @@ bool MainWindow::is_ml_comment_stop(QString& s){
 }
 bool MainWindow::is_number(QString& s){
     std::string tmps = s.toLocal8Bit().constData();
-    if ( isdigit( tmps[0] )|| (((tmps[0] == '-' ) ||(tmps[0] == '+')) && isdigit(tmps[1])) ){
+    int comma_idx = s.indexOf(",");
+    if ( (isdigit( tmps[0] )|| (((tmps[0] == '-' ) ||(tmps[0] == '+')) && isdigit(tmps[1]))) && comma_idx < 0 ){
+        return TRUE;
+    }
+    return FALSE;
+}
+
+bool MainWindow::is_number_pair(QString& s){
+    std::string tmps = s.toLocal8Bit().constData();
+    int comma_idx = s.indexOf(",");
+    if ( (isdigit( tmps[0] )|| (((tmps[0] == '-' ) ||(tmps[0] == '+')) && isdigit(tmps[1]))) && comma_idx >= 0 ){
         return TRUE;
     }
     return FALSE;
@@ -525,23 +541,52 @@ bool MainWindow::exec_word(QStringList& list, int& cs, LayoutData *ld){
         //qDebug() << "before cs=" <<cs;
         ok = exec_IVAR(list, cs, ld);
         //qDebug() << "after cs=" <<cs;
-        return ok;
     }
     if(QString::compare( ts, "IVEC2", Qt::CaseInsensitive) == 0){ // a int number 2d vector
         qDebug() << "IVEC2 found";
         ok = exec_IVEC2(list, cs, ld);
-        return ok;
     }
     if(QString::compare( ts, "STRI", Qt::CaseInsensitive) == 0){ // string with spaces
         qDebug() << "STRI found";
         ok = exec_STRI(list, cs, ld);
-        return ok;
+    }
+    if(QString::compare( ts, "PATH", Qt::CaseInsensitive) == 0){ // string with spaces
+        qDebug() << "PATH found";
+        ok = exec_PATH(list, cs, ld);
     }
     // some other words to add in this parser
     return ok; //FALSE by default
 }
 
 bool MainWindow::exec_IVAR(QStringList& list, int& cs, LayoutData *dl){
+    list.removeAt(cs); cs--; //remove "IVAR" keyword
+    QString var = list.takeAt(cs); cs--;
+    int v_idx = dl->is_var_exist(dl, var);
+    if (-1 == v_idx ){
+        dl->var_name.push_back(var);
+        dl->var_type.push_back(INTN);
+    }else{
+        if (!is_updating) {
+            qDebug() << "ivar " << var << " exists, fix input file.";
+            return FALSE;
+        }else{
+            // just update the value in layout
+            int fnum = get_int_value(list, cs, dl);
+            dl->var_int_number[dl->val_index[v_idx]] = fnum;
+            //qDebug() << "number is updated: " << fnum ;
+            return TRUE;
+        }
+    }
+    int fnum = get_int_value(list, cs, dl);
+    dl->val_index.push_back(dl->var_int_number.size());
+    dl->var_int_number.push_back(fnum); //file name
+    dl->var_number_modified_flag.push_back(false); // variable is not modified.
+
+    //qDebug() << "number is loaded :" << fnum ;
+    return TRUE;
+}
+
+bool MainWindow::exec_PATH(QStringList& list, int& cs, LayoutData *dl){
     list.removeAt(cs); cs--; //remove "IVAR" keyword
     QString var = list.takeAt(cs); cs--;
     int v_idx = dl->is_var_exist(dl, var);

@@ -16,6 +16,7 @@
 #include "mybutton.h"
 #include "myindicator.h"
 #include "simplelayout.h"
+#include "path.h"
 
 /*
 *   This layout data contains all objects are needed to build qtlcnc layouts.
@@ -42,6 +43,7 @@ enum BASE_TYPES
     INTN,    // defined as IVAR
     IVEC2,  // 2dim vector of 2 ints
     STRI,   // multi word string, containing spaces or tabs.
+    PATH,   // the vector of points on a plain
     STATE,  // A structure which represents the single state of any layout object, may include a bunch of properties.
     BUTTON, // layout object
     LABEL,  // text lable
@@ -76,6 +78,7 @@ protected:
     std::vector<Mesh*> var_mesh_arr; // meshes, loaded from file.
     std::vector<Mesh*> var_mesh_arr_copy; // meshes, loaded from file.
     std::vector<QString> var_string; // string variable
+    std::vector<Path*>  var_path;   // path variables for pictures
     std::vector<LCS*> var_lcs;      // local coordinate system
     std::vector<QVector4D> var_quat;// quaternions
     std::vector<int> var_int_number;    // defined as IVAR

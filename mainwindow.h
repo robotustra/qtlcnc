@@ -47,6 +47,7 @@ protected:
     bool is_word(QString& s);
     bool is_string(QString& s);
     bool is_number(QString& s);
+    bool is_number_pair(QString& s);
     bool is_var(QString& s);
     bool is_ml_comment_start(QString& s);
     bool is_ml_comment_stop(QString& s);
@@ -60,6 +61,7 @@ protected:
     QString get_next_quoted_token(QString& str);
 
     bool exec_IVAR(QStringList& list, int& cs, LayoutData *dl);
+    bool exec_PATH(QStringList& list, int& cs, LayoutData *dl); // a set of numbers
     bool exec_IVEC2(QStringList& list, int& cs, LayoutData *dl);
     bool exec_STRI(QStringList& list, int& cs, LayoutData *dl);
 

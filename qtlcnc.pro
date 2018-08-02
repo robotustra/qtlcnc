@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     backdrop.cpp \
     glmesh.cpp \
     myindicator.cpp \
-    simplelayout.cpp
+    simplelayout.cpp \
+    path.cpp
 
 HEADERS  += mainwindow.h \
     layoutdata.h \
@@ -33,7 +34,8 @@ HEADERS  += mainwindow.h \
     backdrop.h \
     glmesh.h \
     myindicator.h \
-    simplelayout.h
+    simplelayout.h \
+    path.h
 
 FORMS    += mainwindow.ui
 
