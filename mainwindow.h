@@ -43,7 +43,7 @@ public:
 protected:
     // parser functions
     bool parse_list(QStringList& list, LayoutData* ld);
-    bool parse_raw_string(QString &str, LayoutData* ld);
+    //bool parse_raw_string(QString &str, LayoutData* ld);
     bool is_word(QString& s);
     bool is_string(QString& s);
     bool is_number(QString& s);
@@ -51,13 +51,17 @@ protected:
     bool is_ml_comment_start(QString& s);
     bool is_ml_comment_stop(QString& s);
     bool is_sl_comment(QString& s);
+    bool is_single_quote(QString& s);
     bool is_unknown(QString& s);
     bool exec_word(QStringList& list, int& cs, LayoutData *ld);
     int  get_int_value(QStringList& list, int& cs, LayoutData *dl);
     float get_float_value(QStringList& list, int& cs, LayoutData *dl);
+    QString get_stri_value(QStringList& list, int& cs, LayoutData *dl);
+    QString get_next_quoted_token(QString& str);
 
     bool exec_IVAR(QStringList& list, int& cs, LayoutData *dl);
     bool exec_IVEC2(QStringList& list, int& cs, LayoutData *dl);
+    bool exec_STRI(QStringList& list, int& cs, LayoutData *dl);
 
 
 protected:

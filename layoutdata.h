@@ -41,6 +41,7 @@ enum BASE_TYPES
     MAT4,
     INTN,    // defined as IVAR
     IVEC2,  // 2dim vector of 2 ints
+    STRI,   // multi word string, containing spaces or tabs.
     STATE,  // A structure which represents the single state of any layout object, may include a bunch of properties.
     BUTTON, // layout object
     LABEL,  // text lable
@@ -74,6 +75,7 @@ protected:
     std::vector<bool> var_int_number_modified_flag; // ints
     std::vector<Mesh*> var_mesh_arr; // meshes, loaded from file.
     std::vector<Mesh*> var_mesh_arr_copy; // meshes, loaded from file.
+    std::vector<QString> var_string; // string variable
     std::vector<LCS*> var_lcs;      // local coordinate system
     std::vector<QVector4D> var_quat;// quaternions
     std::vector<int> var_int_number;    // defined as IVAR
