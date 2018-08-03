@@ -715,6 +715,7 @@ int MainWindow::get_int_value(QStringList& list, int& cs, LayoutData *dl){
 }
 
 QString MainWindow::get_stri_value(QStringList& list, int& cs, LayoutData *dl){
+    dl = dl;
     QString sv = list.takeAt(0); cs--;
     return sv;
 }
