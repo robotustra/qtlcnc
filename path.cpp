@@ -1,6 +1,7 @@
 #include "path.h"
 
-Path::Path()
-{
 
+Path2D::Path2D(QStringList &sl)
+{
+    p = sl;
 }

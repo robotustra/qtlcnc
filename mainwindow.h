@@ -9,6 +9,8 @@
 #include <QPixmap>
 #include <QWidget>
 #include "layoutdata.h"
+#include "path.h"
+#include "state.h"
 
 #ifndef TRUE
 #define TRUE true
@@ -45,6 +47,7 @@ protected:
     bool parse_list(QStringList& list, LayoutData* ld);
     //bool parse_raw_string(QString &str, LayoutData* ld);
     bool is_word(QString& s);
+    bool is_type(QString& s);
     bool is_string(QString& s);
     bool is_number(QString& s);
     bool is_number_pair(QString& s);
@@ -59,11 +62,15 @@ protected:
     float get_float_value(QStringList& list, int& cs, LayoutData *dl);
     QString get_stri_value(QStringList& list, int& cs, LayoutData *dl);
     QString get_next_quoted_token(QString& str);
+    Path2D * get_path_value(QStringList& list, int& cs, LayoutData *dl);
+    State * get_state_value(QStringList& list, int& cs, LayoutData *dl);
+
 
     bool exec_IVAR(QStringList& list, int& cs, LayoutData *dl);
     bool exec_PATH(QStringList& list, int& cs, LayoutData *dl); // a set of numbers
     bool exec_IVEC2(QStringList& list, int& cs, LayoutData *dl);
     bool exec_STRI(QStringList& list, int& cs, LayoutData *dl);
+    bool exec_STATE(QStringList& list, int& cs, LayoutData *dl);
 
 
 protected:

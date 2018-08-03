@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QFile>
 #include "layoutdata.h"
+#include "path.h"
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -195,6 +196,7 @@ int MainWindow::load_config(QString fname){
         file.close();
         res = 0;
         qDebug()<< "size of list = " << stringList.size();
+        QStringList list; //list of words to parse
         for (int i=0; i<stringList.size(); ++i)
         {
             QString str = stringList[i];
@@ -209,7 +211,6 @@ int MainWindow::load_config(QString fname){
                 // string to get,
                 QString line = stringList[i].trimmed();
 
-                QStringList list;
                 if ( fs == QChar('\'') ){
                     // there is quoted text,
                     QString qstring = get_next_quoted_token(line);
@@ -224,7 +225,10 @@ int MainWindow::load_config(QString fname){
                     QRegExp rx("[\t ]");// match tab or a space
                     //QString sline = line;
                     //qDebug() << "[" << sline << "]";
-                    list = line.split(rx, QString::SkipEmptyParts);
+                    QStringList add_list = line.split(rx, QString::SkipEmptyParts);
+                    //adding more vords to parse, support multiline input from file
+                    for (int jj=0; jj<add_list.size(); jj++)
+                        list.push_back(add_list[jj]);
                 }
                 ini_file_str += line + QString('\n');
                 // now we have line we just have to parse it.
@@ -250,7 +254,7 @@ int MainWindow::load_config(QString fname){
 */
 bool MainWindow::parse_list(QStringList& list, LayoutData* ld){
     int cs = 0; //position
-    qDebug() << list;
+    //qDebug() << list;
     // put string in the stack,
     // put variable in the stack
     // execute command
@@ -261,7 +265,8 @@ bool MainWindow::parse_list(QStringList& list, LayoutData* ld){
         //qDebug() << ts;
         if (!multiline_comment_on && is_sl_comment(ts)){
             //qDebug()<< "single line comment";
-            list.clear();
+            // remove wotds from list[i] to the end of the list:
+            while (i<list.size()) list.removeAt(i);
             return TRUE;
         } else
         if (!multiline_comment_on && is_string(ts)){
@@ -272,8 +277,14 @@ bool MainWindow::parse_list(QStringList& list, LayoutData* ld){
         else if (!multiline_comment_on && is_word(ts))
         {
             //qDebug() << "this is a word, executing";
+            qDebug() << "list before exec_word: "<< list;
             ok = exec_word(list, cs, ld);
             list.clear();
+        }
+        else if (!multiline_comment_on && is_type(ts))
+        {
+            qDebug() << "type modifier "<< ts;
+            cs++;
         }
         else if (!multiline_comment_on && is_number(ts))
         {
@@ -287,7 +298,7 @@ bool MainWindow::parse_list(QStringList& list, LayoutData* ld){
         }
         else if (!multiline_comment_on && is_var(ts))
         {
-            //qDebug()<< "var found =" << ts << "\n";
+            qDebug()<< "var found =" << ts;
             cs++;
         }
         else if (is_ml_comment_start(ts)){
@@ -371,7 +382,8 @@ std::string key_words[] = {
         "IVAR",
         "IVEC2",
         "STRI",
-        "PATH"
+        "PATH",
+        "STATE"
     };
 
     for (uint i=0; i< (sizeof(key_words)/sizeof(key_words[0])); i++){
@@ -380,6 +392,26 @@ std::string key_words[] = {
     }
     return FALSE;
 }
+
+// define the type of the data to interpret
+bool MainWindow::is_type(QString& s){
+std::string key_words[] = {
+        "POS",
+        "SIZE",
+        "BGCOL",
+        "PCOL",
+        "PIX",
+        "CMDL",
+        "STATL"
+    };
+
+    for (uint i=0; i< (sizeof(key_words)/sizeof(key_words[0])); i++){
+        int x = QString::compare(s, QString::fromStdString( key_words[i] ), Qt::CaseInsensitive);
+        if (x==0) return TRUE;
+    }
+    return FALSE;
+}
+
 
 
 bool MainWindow::is_string(QString& s){
@@ -554,6 +586,10 @@ bool MainWindow::exec_word(QStringList& list, int& cs, LayoutData *ld){
         qDebug() << "PATH found";
         ok = exec_PATH(list, cs, ld);
     }
+    if(QString::compare( ts, "STATE", Qt::CaseInsensitive) == 0){ // state object
+        qDebug() << "STATE found";
+        ok = exec_STATE(list, cs, ld);
+    }
     // some other words to add in this parser
     return ok; //FALSE by default
 }
@@ -586,33 +622,77 @@ bool MainWindow::exec_IVAR(QStringList& list, int& cs, LayoutData *dl){
     return TRUE;
 }
 
+/* Path has a multiple string parameter to add.
+ * Eash parameter has a mini command to encode the path:
+ * 1) "10,20M" means  move(10,20)
+ * 2) "30,40L" means  lineTo(30,40)
+ * 3) "1,2,180,5A" means the arc with directing vector (1,2) CCW on 180 degree, with radius 5
+ * 4) "1,2,-180,10A" means the arc with direction vector (1,2) CW on 180 degree, with radius 10.
+ * 5) "1,2,30,40E" means closed circle or ellipse on the rectangle box
+ * 6) "1,2,30,40R" means rectangle
+ * 7) "1,2,4C"  means circle with the radius 4 and the center point (1,2)
+ *
+ * These are flat pathes, but for 3d stuff PATH3D should be use.
+ *
+ * All parameters of the PATH are strings except the name pf path.
+ *
+*/
 bool MainWindow::exec_PATH(QStringList& list, int& cs, LayoutData *dl){
-    list.removeAt(cs); cs--; //remove "IVAR" keyword
-    QString var = list.takeAt(cs); cs--;
+    list.removeAt(cs); cs--; //remove "PATH" keyword
+    QString var = list.takeAt(cs); cs--; // var name.
+    // putting this var name to data structure
     int v_idx = dl->is_var_exist(dl, var);
     if (-1 == v_idx ){
         dl->var_name.push_back(var);
-        dl->var_type.push_back(INTN);
+        dl->var_type.push_back(PATH);
     }else{
         if (!is_updating) {
-            qDebug() << "ivar " << var << " exists, fix input file.";
+            qDebug() << "path " << var << " exists, fix input file.";
             return FALSE;
         }else{
             // just update the value in layout
-            int fnum = get_int_value(list, cs, dl);
-            dl->var_int_number[dl->val_index[v_idx]] = fnum;
+            Path2D* pa = get_path_value(list, cs, dl);
+            dl->var_path[dl->val_index[v_idx]] = pa;
+            //qDebug() << "path is updated: " << fnum ;
+            return TRUE;
+        }
+    }
+    Path2D* pa = get_path_value(list, cs, dl);
+    dl->val_index.push_back(dl->var_path.size());
+    dl->var_path.push_back(pa);
+    dl->var_number_modified_flag.push_back(false); // new path
+    //qDebug() << "path is loaded :" << fnum ;
+    return TRUE;
+}
+
+bool MainWindow::exec_STATE(QStringList& list, int& cs, LayoutData *dl){
+    list.removeAt(cs); cs--; //remove "STATE" keyword
+    QString var = list.takeAt(cs); cs--; // var name.
+    // putting this var name to data structure
+    int v_idx = dl->is_var_exist(dl, var);
+    if (-1 == v_idx ){
+        dl->var_name.push_back(var);
+        dl->var_type.push_back(STATE);
+    }else{
+        if (!is_updating) {
+            qDebug() << "state " << var << " exists, fix input file.";
+            return FALSE;
+        }else{
+            // just update the value in layout
+            State* ps = get_state_value(list, cs, dl);
+            dl->var_state[dl->val_index[v_idx]] = ps;
             //qDebug() << "number is updated: " << fnum ;
             return TRUE;
         }
     }
-    int fnum = get_int_value(list, cs, dl);
-    dl->val_index.push_back(dl->var_int_number.size());
-    dl->var_int_number.push_back(fnum); //file name
-    dl->var_number_modified_flag.push_back(false); // variable is not modified.
-
-    //qDebug() << "number is loaded :" << fnum ;
+    State* pa = get_state_value(list, cs, dl);
+    dl->val_index.push_back(dl->var_state.size());
+    dl->var_state.push_back(pa);
+    dl->var_number_modified_flag.push_back(false); // new path
+    //qDebug() << "state is loaded :" << fnum ;
     return TRUE;
 }
+
 
 /*
     Saving multiword string in single quotes.
@@ -737,5 +817,19 @@ int MainWindow::get_int_value_from_data(QString var){
         }
     }
     return res;
+}
+
+// Getting strings parameters and prepare constructor for Path2D
+Path2D* MainWindow::get_path_value(QStringList& list, int& cs, LayoutData *dl){
+    // no verification yet.
+
+    return new Path2D(list);
+}
+
+// Getting strings parameters and prepare constructor State
+State* MainWindow::get_state_value(QStringList& list, int& cs, LayoutData *dl){
+    // no verification yet.
+
+    return new State(list);
 }
 

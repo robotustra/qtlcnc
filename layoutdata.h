@@ -78,7 +78,7 @@ protected:
     std::vector<Mesh*> var_mesh_arr; // meshes, loaded from file.
     std::vector<Mesh*> var_mesh_arr_copy; // meshes, loaded from file.
     std::vector<QString> var_string; // string variable
-    std::vector<Path*>  var_path;   // path variables for pictures
+    std::vector<Path2D*>  var_path;   // path variables for pictures
     std::vector<LCS*> var_lcs;      // local coordinate system
     std::vector<QVector4D> var_quat;// quaternions
     std::vector<int> var_int_number;    // defined as IVAR
