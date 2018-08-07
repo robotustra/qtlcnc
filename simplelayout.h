@@ -12,7 +12,7 @@ public:
 
     bool selected;
 
-private:
+public: // replace with private after debugging is finished
     QStringList elements;
 };
 

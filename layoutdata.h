@@ -18,6 +18,7 @@
 #include "myindicator.h"
 #include "simplelayout.h"
 #include "path.h"
+#include "layoutobject.h"
 
 /*
 *   This layout data contains all objects are needed to build qtlcnc layouts.
@@ -62,6 +63,7 @@ public:
     int is_var_exist(LayoutData* ar, QString var);
     void draw_layout(QPainter & painter); // draw current layout according to the current state.
     bool is_the_same_file(QString fn);
+    LayoutObject * get_layout_object_by_name(QString& obj_name);
 
 
 protected:
@@ -105,6 +107,7 @@ protected:
     QString status;
     QString filename;
     bool is_parsing;
+    int current_layout;
 
     friend class MainWindow;
 };

@@ -23,7 +23,8 @@ SOURCES += main.cpp\
     glmesh.cpp \
     myindicator.cpp \
     simplelayout.cpp \
-    path.cpp
+    path.cpp \
+    layoutobject.cpp
 
 HEADERS  += mainwindow.h \
     layoutdata.h \
@@ -35,7 +36,8 @@ HEADERS  += mainwindow.h \
     glmesh.h \
     myindicator.h \
     simplelayout.h \
-    path.h
+    path.h \
+    layoutobject.h
 
 FORMS    += mainwindow.ui
 

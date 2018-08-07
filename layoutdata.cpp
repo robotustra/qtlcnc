@@ -3,6 +3,7 @@
 LayoutData::LayoutData(QString filename)
 {
     this->filename = filename;
+    current_layout = -1;
 }
 
 
@@ -35,8 +36,16 @@ int LayoutData::is_var_exist(LayoutData* ld, QString var){
 
 */
 void LayoutData::draw_layout(QPainter &painter){
+    if (current_layout < 0 && var_slayout.size() > 0){
+        current_layout = 0;
+        var_slayout[0]->selected = true;
+        qDebug() << "setting default layout to 0";
+    }
+
+    qDebug() << "num simple layouts: " << var_slayout.size();
+
     SimpleLayout * sl = NULL;
-    for(int i=0; i<var_slayout.size(); i++){
+    for(uint i=0; i<var_slayout.size(); i++){
         if (var_slayout[i]->selected == true) {
             sl = var_slayout[i];
             break;
@@ -44,9 +53,17 @@ void LayoutData::draw_layout(QPainter &painter){
     }
 
     if (sl == NULL) {
-        qDebug() << "no active layout to draw. Modify ini file";
+        qDebug() << "no active layout to draw. Add layouts in the .ini file";
         return;
     }
+
+    qDebug()<< "layout elments to display: " << sl->elements ;
+    for (uint i=0; i < sl->elements.size(); i++){
+        LayoutObject * lo = get_layout_object_by_name(sl->elements[i]);
+
+    }
+
+
 
     /*
     static const QPoint points[4] = {
@@ -87,7 +104,7 @@ void LayoutData::draw_layout(QPainter &painter){
         for (int y = 0; y < ggeom.height() * ucell; y += ucell) {
             painter.save();
             painter.translate(loffset.x() + x, loffset.y() + y);
-            /*
+            / *
             if (transformed) {
                 painter.translate(50, 50);
                 painter.rotate(60.0);
@@ -146,3 +163,14 @@ bool LayoutData::is_the_same_file(QString fn){
     if (QString::compare(fn, filename, Qt::CaseSensitive) == 0) return TRUE;
     return FALSE;
 }
+
+/*
+    Function lookup the all tree and get the type of the object. If it's a layout object it return it's pointer.
+*/
+LayoutObject* LayoutData::get_layout_object_by_name(QString& obj_name){
+    int idx = is_var_exist(this, obj_name);
+    if (-1 == idx) return NULL; // name is not found
+    .....
+
+}
+

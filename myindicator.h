@@ -1,7 +1,9 @@
 #ifndef MYINDICATOR_H
 #define MYINDICATOR_H
 
-class MyIndicator
+#include "layoutobject.h"
+
+class MyIndicator: public LayoutObject
 {
 public:
     MyIndicator();
