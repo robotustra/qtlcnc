@@ -1,5 +1,6 @@
 #include "mybutton.h"
 
-MyButton::MyButton()
+MyButton::MyButton(QStringList & sl)
 {
+    elements = sl;
 }

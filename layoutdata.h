@@ -5,6 +5,7 @@
 #include <QPoint>
 #include <QRect>
 #include <QMatrix4x4>
+#include <QPainter>
 #include "state.h"
 //#include <QtOpenGL/QtOpenGL> not ready for GL yet
 
@@ -59,8 +60,9 @@ public:
     LayoutData(QString filename);
     void print_layout();
     int is_var_exist(LayoutData* ar, QString var);
-    void draw_layout(); // draw current layout according to the current state.
+    void draw_layout(QPainter & painter); // draw current layout according to the current state.
     bool is_the_same_file(QString fn);
+
 
 protected:
 

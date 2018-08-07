@@ -38,104 +38,10 @@ void MainWindow::set_window_size(QSize s, QPoint pt){
 }
 
 void MainWindow::paintEvent(QPaintEvent * e){
-    e = e;
-    static const QPoint points[4] = {
-        QPoint(10, 10),
-        QPoint(90, 10),
-        QPoint(90, 90),
-        QPoint(10, 90)
-    };
-    // example
-    //painter.drawRect(0, 0, 100,100);
-    //QRect rect(10, 20, 80, 60);
-
-    QRect rect(0, 0, ucell-4, ucell-4);
-
-    QPainterPath path;
-    path.moveTo(20, 80);
-    path.lineTo(20, 30);
-    path.cubicTo(80, 0, 50, 50, 80, 80);
-
-    int startAngle = 20 * 16;
-    int arcLength = 120 * 16;
-
     QPainter painter(this);
-    //pen = QPen("darkgreen");
-    pen = QPen(QColor("black"), 1.5);
+    painter.fillRect(e->rect(), QColor(0,0,0,0));
 
-    painter.setPen(pen);
-
-    QLinearGradient lg(0,0,100,100);
-
-    //brush = QBrush("gray", Qt::LinearGradientPattern);
-    brush = QBrush(Qt::NoBrush);
-    painter.setBrush(brush);
-
-    shape = Rect;
-    painter.setRenderHint(QPainter::Antialiasing, true);
-
-    transformed = false;
-    for (int x = 0; x < ggeom.width() * ucell; x += ucell) {
-        for (int y = 0; y < ggeom.height() * ucell; y += ucell) {
-            painter.save();
-            painter.translate(loffset.x() + x, loffset.y() + y);
-            /*
-            if (transformed) {
-                painter.translate(50, 50);
-                painter.rotate(60.0);
-                painter.scale(0.6, 0.9);
-                painter.translate(-50, -50);
-            }*/
-
-            switch (shape) {
-            case Line:
-                painter.drawLine(rect.bottomLeft(), rect.topRight());
-                break;
-            case Points:
-                painter.drawPoints(points, 4);
-                break;
-            case Polyline:
-                painter.drawPolyline(points, 4);
-                break;
-            case Polygon:
-                painter.drawPolygon(points, 4);
-                break;
-            case Rect:
-                painter.drawRect(rect);
-                break;
-            case RoundedRect:
-                painter.drawRoundedRect(rect, 25, 25, Qt::RelativeSize);
-                break;
-            case Ellipse:
-                painter.drawEllipse(rect);
-                break;
-            case Arc:
-                painter.drawArc(rect, startAngle, arcLength);
-                break;
-            case Chord:
-                painter.drawChord(rect, startAngle, arcLength);
-                break;
-            case Pie:
-                painter.drawPie(rect, startAngle, arcLength);
-                break;
-            case Path:
-                painter.drawPath(path);
-                break;
-            case Text:
-                painter.drawText(rect, Qt::AlignCenter, tr("Qt by\nNokia"));
-                break;
-            case Pixmap:
-                painter.drawPixmap(10, 10, pixmap);
-            }
-            painter.restore();
-        }
-    }
-
-    painter.setRenderHint(QPainter::Antialiasing, false);
-    painter.setPen(palette().dark().color());
-    painter.setBrush(Qt::NoBrush);
-    painter.drawRect(QRect(0, 0, width() - 1, height() - 1));
-
+    ld->draw_layout(painter);
 }
 
 void MainWindow::set_ggeom(int w, int h){
@@ -383,7 +289,10 @@ std::string key_words[] = {
         "IVEC2",
         "STRI",
         "PATH",
-        "STATE"
+        "STATE",
+        "BUTTON",
+        "LAYOUT"
+
     };
 
     for (uint i=0; i< (sizeof(key_words)/sizeof(key_words[0])); i++){
@@ -393,7 +302,7 @@ std::string key_words[] = {
     return FALSE;
 }
 
-// define the type of the data to interpret
+// define the type of the data to interpret, these words are reserved and can't be used as variable.
 bool MainWindow::is_type(QString& s){
 std::string key_words[] = {
         "POS",
@@ -590,6 +499,14 @@ bool MainWindow::exec_word(QStringList& list, int& cs, LayoutData *ld){
         qDebug() << "STATE found";
         ok = exec_STATE(list, cs, ld);
     }
+    if(QString::compare( ts, "BUTTON", Qt::CaseInsensitive) == 0){ // button object
+        qDebug() << "BUTTON found";
+        ok = exec_BUTTON(list, cs, ld);
+    }
+    if(QString::compare( ts, "LAYOUT", Qt::CaseInsensitive) == 0){ // layout object
+        qDebug() << "LAYOUT found";
+        ok = exec_LAYOUT(list, cs, ld);
+    }
     // some other words to add in this parser
     return ok; //FALSE by default
 }
@@ -689,6 +606,63 @@ bool MainWindow::exec_STATE(QStringList& list, int& cs, LayoutData *dl){
     dl->val_index.push_back(dl->var_state.size());
     dl->var_state.push_back(pa);
     dl->var_number_modified_flag.push_back(false); // new path
+    //qDebug() << "state is loaded :" << fnum ;
+    return TRUE;
+}
+
+bool MainWindow::exec_BUTTON(QStringList& list, int& cs, LayoutData *dl){
+    list.removeAt(cs); cs--; //remove "BUTTON" keyword
+    QString var = list.takeAt(cs); cs--; // var name.
+    // putting this var name to data structure
+    int v_idx = dl->is_var_exist(dl, var);
+    if (-1 == v_idx ){
+        dl->var_name.push_back(var);
+        dl->var_type.push_back(BUTTON);
+    }else{
+        if (!is_updating) {
+            qDebug() << "button " << var << " exists, fix input file.";
+            return FALSE;
+        }else{
+            // just update the value in layout
+            MyButton * ps = get_button_value(list, cs, dl);
+            dl->var_mybutton[dl->val_index[v_idx]] = ps;
+            //qDebug() << "number is updated: " << fnum ;
+            return TRUE;
+        }
+    }
+    MyButton * pa = get_button_value(list, cs, dl);
+    dl->val_index.push_back(dl->var_mybutton.size());
+    dl->var_mybutton.push_back(pa);
+    dl->var_number_modified_flag.push_back(false); // new layout
+    //qDebug() << "state is loaded :" << fnum ;
+    return TRUE;
+}
+
+
+bool MainWindow::exec_LAYOUT(QStringList& list, int& cs, LayoutData *dl){
+    list.removeAt(cs); cs--; //remove "LAYOUT" keyword
+    QString var = list.takeAt(cs); cs--; // var name.
+    // putting this var name to data structure
+    int v_idx = dl->is_var_exist(dl, var);
+    if (-1 == v_idx ){
+        dl->var_name.push_back(var);
+        dl->var_type.push_back(LAYOUT);
+    }else{
+        if (!is_updating) {
+            qDebug() << "layout " << var << " exists, fix input file.";
+            return FALSE;
+        }else{
+            // just update the value in layout
+            SimpleLayout * ps = get_slayout_value(list, cs, dl);
+            dl->var_slayout[dl->val_index[v_idx]] = ps;
+            //qDebug() << "number is updated: " << fnum ;
+            return TRUE;
+        }
+    }
+    SimpleLayout* pa = get_slayout_value(list, cs, dl);
+    dl->val_index.push_back(dl->var_slayout.size());
+    dl->var_slayout.push_back(pa);
+    dl->var_number_modified_flag.push_back(false); // new layout
     //qDebug() << "state is loaded :" << fnum ;
     return TRUE;
 }
@@ -831,5 +805,18 @@ State* MainWindow::get_state_value(QStringList& list, int& cs, LayoutData *dl){
     // no verification yet.
 
     return new State(list);
+}
+
+// Getting strings parameters and prepare constructor State
+MyButton* MainWindow::get_button_value(QStringList& list, int& cs, LayoutData *dl){
+    // no verification yet.
+    return new MyButton(list);
+}
+
+
+// Getting strings parameters and prepare constructor State
+SimpleLayout* MainWindow::get_slayout_value(QStringList& list, int& cs, LayoutData *dl){
+    // no verification yet.
+    return new SimpleLayout(list);
 }
 

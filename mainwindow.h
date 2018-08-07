@@ -8,9 +8,12 @@
 #include <QPen>
 #include <QPixmap>
 #include <QWidget>
+#include <QPainter>
 #include "layoutdata.h"
 #include "path.h"
 #include "state.h"
+#include "simplelayout.h"
+#include "mybutton.h"
 
 #ifndef TRUE
 #define TRUE true
@@ -64,13 +67,16 @@ protected:
     QString get_next_quoted_token(QString& str);
     Path2D * get_path_value(QStringList& list, int& cs, LayoutData *dl);
     State * get_state_value(QStringList& list, int& cs, LayoutData *dl);
-
+    MyButton* get_button_value(QStringList& list, int& cs, LayoutData *dl);
+    SimpleLayout* get_slayout_value(QStringList& list, int& cs, LayoutData *dl);
 
     bool exec_IVAR(QStringList& list, int& cs, LayoutData *dl);
     bool exec_PATH(QStringList& list, int& cs, LayoutData *dl); // a set of numbers
     bool exec_IVEC2(QStringList& list, int& cs, LayoutData *dl);
     bool exec_STRI(QStringList& list, int& cs, LayoutData *dl);
     bool exec_STATE(QStringList& list, int& cs, LayoutData *dl);
+    bool exec_BUTTON(QStringList& list, int& cs, LayoutData *dl);
+    bool exec_LAYOUT(QStringList& list, int& cs, LayoutData *dl);
 
 
 protected:
