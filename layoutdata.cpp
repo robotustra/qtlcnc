@@ -168,9 +168,10 @@ bool LayoutData::is_the_same_file(QString fn){
     Function lookup the all tree and get the type of the object. If it's a layout object it return it's pointer.
 */
 LayoutObject* LayoutData::get_layout_object_by_name(QString& obj_name){
+    LayoutObject * l_obj = NULL;
     int idx = is_var_exist(this, obj_name);
     if (-1 == idx) return NULL; // name is not found
-    .....
-
+    //.....
+    return l_obj;
 }
 
