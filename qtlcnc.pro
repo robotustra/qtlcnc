@@ -24,7 +24,10 @@ SOURCES += main.cpp\
     myindicator.cpp \
     simplelayout.cpp \
     path.cpp \
-    layoutobject.cpp
+    layoutobject.cpp \
+    myglview.cpp \
+    gcodeview.cpp \
+    gcodeedit.cpp
 
 HEADERS  += mainwindow.h \
     layoutdata.h \
@@ -37,7 +40,10 @@ HEADERS  += mainwindow.h \
     myindicator.h \
     simplelayout.h \
     path.h \
-    layoutobject.h
+    layoutobject.h \
+    myglview.h \
+    gcodeview.h \
+    gcodeedit.h
 
 FORMS    += mainwindow.ui
 

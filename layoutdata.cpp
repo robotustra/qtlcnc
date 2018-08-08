@@ -171,7 +171,43 @@ LayoutObject* LayoutData::get_layout_object_by_name(QString& obj_name){
     LayoutObject * l_obj = NULL;
     int idx = is_var_exist(this, obj_name);
     if (-1 == idx) return NULL; // name is not found
-    //.....
+    //we have the name of layout element now, verufy the type of it
+    int t = var_type[idx];
+    switch (t) {
+    case BUTTON:
+        l_obj = var_mybutton[val_index[idx]];
+        qDebug() << "have button: idx =" << val_index[idx] << "name = " << var_name[idx] << "addres =" << l_obj;
+        break;
+    case LABEL:
+        l_obj = var_label[val_index[idx]];
+        qDebug() << "have lavel: idx =" << val_index[idx] << "name = " << var_name[idx];
+        break;
+    case LIND:
+         l_obj = var_indicator[val_index[idx]];
+        qDebug() << "have indicator: idx =" << val_index[idx] << "name = " << var_name[idx];
+        break;
+    case KNOB:
+         l_obj = var_knob[val_index[idx]];
+        qDebug() << "have knob: idx =" << val_index[idx] << "name = " << var_name[idx];
+        break;
+    case GLVIEW:
+        l_obj = var_glview[val_index[idx]]; // contains data for opengl element
+        qDebug() << "have glview: idx =" << val_index[idx] << "name = " << var_name[idx];
+        break;
+    case GCODEVIEW:
+        l_obj = var_gcodeview[val_index[idx]];
+        qDebug() << "have codeview: idx =" << val_index[idx] << "name = " << var_name[idx];
+        break;
+    case GCODEEDIT:
+        l_obj = var_gcodeedit[val_index[idx]];
+        qDebug() << "have codeview: idx =" << val_index[idx] << "name = " << var_name[idx];
+        break;
+
+    default:
+        qDebug() << "object idx =" << val_index[idx] << "is not a type of object for layout element";
+        break;
+    }
+
     return l_obj;
 }
 

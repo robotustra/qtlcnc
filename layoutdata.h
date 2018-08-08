@@ -19,6 +19,9 @@
 #include "simplelayout.h"
 #include "path.h"
 #include "layoutobject.h"
+#include "myglview.h"
+#include "gcodeedit.h"
+#include "gcodeview.h"
 
 /*
 *   This layout data contains all objects are needed to build qtlcnc layouts.
@@ -52,6 +55,9 @@ enum BASE_TYPES
     LIND,   // linear indicator
     KNOB,   // knob
     LAYOUT,
+    GLVIEW,
+    GCODEVIEW,
+    GCODEEDIT,
     MAX_TYPE_INDEX
 };
 
@@ -92,6 +98,9 @@ protected:
     std::vector<MyButton*> var_label;    // text lable is saved in the class button
     std::vector<MyIndicator*> var_indicator;    // linear indicator
     std::vector<MyIndicator*> var_knob;   // knob
+    std::vector<MyGLView*> var_glview;   // OpenGL
+    std::vector<GCodeView*> var_gcodeview;
+    std::vector<GCodeEdit*> var_gcodeedit;
     std::vector<SimpleLayout*> var_slayout; // one screen layout
 
     QMatrix4x4 view_matrix() const; // We have only one view matrix
