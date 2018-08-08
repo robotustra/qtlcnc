@@ -1,9 +1,11 @@
 #ifndef MYGLVIEW_H
 #define MYGLVIEW_H
+
 #include "layoutobject.h"
 
 
-class MyGLView: public LayoutObject
+
+class MyGLView: public MyLayoutObject
 {
 public:
     MyGLView();

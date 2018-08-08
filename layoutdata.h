@@ -6,7 +6,6 @@
 #include <QRect>
 #include <QMatrix4x4>
 #include <QPainter>
-#include "state.h"
 //#include <QtOpenGL/QtOpenGL> not ready for GL yet
 
 #include <vector>
@@ -14,11 +13,9 @@
 #include "backdrop.h"
 #include "mesh.h"
 #include "lcs.h"
-#include "mybutton.h"
 #include "myindicator.h"
 #include "simplelayout.h"
 #include "path.h"
-#include "layoutobject.h"
 #include "myglview.h"
 #include "gcodeedit.h"
 #include "gcodeview.h"
@@ -61,6 +58,9 @@ enum BASE_TYPES
     MAX_TYPE_INDEX
 };
 
+class MyState;
+class MyButton;
+
 class LayoutData
 {
 public:
@@ -69,7 +69,11 @@ public:
     int is_var_exist(LayoutData* ar, QString var);
     void draw_layout(QPainter & painter); // draw current layout according to the current state.
     bool is_the_same_file(QString fn);
-    LayoutObject * get_layout_object_by_name(QString& obj_name);
+    MyLayoutObject * get_layout_object_by_name(QString& obj_name, int *type);
+    MyState * get_state_object_by_name(QString& obj_name);
+    QPoint* get_pos_var_by_name(QString & pos_name);
+    int get_int_value_by_name(QString& int_name);
+
 
 
 protected:
@@ -92,8 +96,8 @@ protected:
     std::vector<LCS*> var_lcs;      // local coordinate system
     std::vector<QVector4D> var_quat;// quaternions
     std::vector<int> var_int_number;    // defined as IVAR
-    std::vector<QPoint> var_ivec2;  // 2dim vector of 2 ints
-    std::vector<State*> var_state;  // A structure which represents the single state of any layout object, may include a bunch of properties.
+    std::vector<QPoint*> var_ivec2;  // 2dim vector of 2 ints
+    std::vector<MyState*> var_state;  // A structure which represents the single state of any layout object, may include a bunch of properties.
     std::vector<MyButton*> var_mybutton; // layout object
     std::vector<MyButton*> var_label;    // text lable is saved in the class button
     std::vector<MyIndicator*> var_indicator;    // linear indicator

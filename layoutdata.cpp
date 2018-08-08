@@ -1,4 +1,7 @@
 #include "layoutdata.h"
+#include "layoutobject.h"
+#include "state.h"
+#include "mybutton.h"
 
 LayoutData::LayoutData(QString filename)
 {
@@ -58,9 +61,14 @@ void LayoutData::draw_layout(QPainter &painter){
     }
 
     qDebug()<< "layout elments to display: " << sl->elements ;
-    for (uint i=0; i < sl->elements.size(); i++){
-        LayoutObject * lo = get_layout_object_by_name(sl->elements[i]);
+    for (int i=0; i < sl->elements.size(); i++){
+        int t;
+        MyLayoutObject * lo = get_layout_object_by_name(sl->elements[i], &t);
+        if (t == BUTTON){
+            MyButton * mb = (MyButton*) lo;
+            mb->drawLayoutObject(painter);
 
+        }
     }
 
 
@@ -167,12 +175,13 @@ bool LayoutData::is_the_same_file(QString fn){
 /*
     Function lookup the all tree and get the type of the object. If it's a layout object it return it's pointer.
 */
-LayoutObject* LayoutData::get_layout_object_by_name(QString& obj_name){
-    LayoutObject * l_obj = NULL;
+MyLayoutObject* LayoutData::get_layout_object_by_name(QString& obj_name, int * type){
+    MyLayoutObject * l_obj = NULL;
     int idx = is_var_exist(this, obj_name);
     if (-1 == idx) return NULL; // name is not found
     //we have the name of layout element now, verufy the type of it
     int t = var_type[idx];
+    *type = t;
     switch (t) {
     case BUTTON:
         l_obj = var_mybutton[val_index[idx]];
@@ -209,5 +218,45 @@ LayoutObject* LayoutData::get_layout_object_by_name(QString& obj_name){
     }
 
     return l_obj;
+}
+
+MyState * LayoutData::get_state_object_by_name(QString& obj_name){
+    MyState * s_obj = NULL;
+    int idx = is_var_exist(this, obj_name);
+    if (-1 == idx) return NULL; // name is not found
+    //we have the name of state element now, verufy the type of it
+    int t = var_type[idx];
+    if (t == STATE){
+        s_obj = var_state [val_index[idx]];
+        qDebug() << "have state: idx =" << val_index[idx] << "name = " << var_name[idx] << "addres =" << s_obj;
+    }
+     return s_obj; // if it's not a state object, return NULL;
+}
+
+QPoint * LayoutData::get_pos_var_by_name(QString & pos_name){
+    QPoint * pt = NULL;
+    int idx = is_var_exist(this, pos_name);
+    if (-1 == idx) return NULL; // name is not found
+    int t = var_type[idx];
+    if (t == IVEC2){
+        pt = var_ivec2 [val_index[idx]];
+        qDebug() << "have point: idx =" << val_index[idx] << "name = " << var_name[idx] << "addres =" << pt;
+    }
+    return pt; // it's a reference to the point;
+}
+
+int LayoutData::get_int_value_by_name(QString& int_name){
+    qDebug() << "looking for var: " << int_name;
+    int val_idx = is_var_exist(this, int_name);
+    qDebug() << " var idx: " << val_idx;
+    if ( val_idx >= 0 ){ // have variable
+        if (this->var_type[val_idx] == INTN){
+            qDebug() << " var type: " << var_type[val_idx];
+            return var_int_number[this->val_index[val_idx]];
+        }
+    }else{
+        qDebug() << "error, variable " << int_name << " does not exist, fix the config file";
+    }
+    return 0;
 }
 

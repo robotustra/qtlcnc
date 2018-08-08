@@ -2,16 +2,27 @@
 #define MYBUTTON_H
 #include <QStringList>
 #include "layoutobject.h"
+#include "state.h"
 
-class MyButton: public LayoutObject
+class MyState;
+
+class MyButton: public MyLayoutObject
 {
 public:
-    MyButton(QStringList & sl);
-
+    MyButton(QStringList & sl, LayoutData *ld);
+    void drawLayoutObject( QPainter& p);
+    void selectLayoutObject();
+    void setLayoutObjectStatus();
+    void getLayoutObjectStatus();
+    void setLayoutObjectPropertiy();
+    void getLayoutObjectPropertiy();
+    MyState* getState(LayoutData* ld, QString state_name);
 
 private:
 
-    QStringList elements;
+    QStringList elements;   // this list contains the states button can have.
+    int current_state;      // if the more than one state possible this index keep it.
+    LayoutData * ld_local;  // save the pointer to the data while initializing;
 
 };
 

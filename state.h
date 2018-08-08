@@ -2,13 +2,19 @@
 #define STATE_H
 #include <QStringList>
 #include <QString>
+#include "layoutdata.h"
+#include <QPoint>
 
 
-class State
+class MyState
 {
 public:
-    State(QStringList & sl);
-    bool update_state_fields(); // parsing input string and try to set fields.
+    MyState(QStringList & sl, LayoutData * ld);
+    bool update_state_fields(LayoutData * ld); // parsing input string and try to set fields.
+
+    QPoint* get_Position(LayoutData * ld);    // returns the position in the
+    QPoint* get_Size(LayoutData * ld);    // returns the position in the
+
 
 private:
     QStringList ss;
@@ -21,6 +27,7 @@ private:
     QString cmd_var_name; // a command line which is send to interpreter when object (button) state is activated
     QString txt_var_name; // a scriptire which is displayer on the button
     QString status_var_name; // a status of the object which is activated
+    LayoutData * ld_local;
 
 };
 

@@ -66,7 +66,7 @@ protected:
     QString get_stri_value(QStringList& list, int& cs, LayoutData *dl);
     QString get_next_quoted_token(QString& str);
     Path2D * get_path_value(QStringList& list, int& cs, LayoutData *dl);
-    State * get_state_value(QStringList& list, int& cs, LayoutData *dl);
+    MyState * get_state_value(QStringList& list, int& cs, LayoutData *dl);
     MyButton* get_button_value(QStringList& list, int& cs, LayoutData *dl);
     SimpleLayout* get_slayout_value(QStringList& list, int& cs, LayoutData *dl);
 

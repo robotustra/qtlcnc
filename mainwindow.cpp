@@ -596,13 +596,13 @@ bool MainWindow::exec_STATE(QStringList& list, int& cs, LayoutData *dl){
             return FALSE;
         }else{
             // just update the value in layout
-            State* ps = get_state_value(list, cs, dl);
+            MyState* ps = get_state_value(list, cs, dl);
             dl->var_state[dl->val_index[v_idx]] = ps;
             //qDebug() << "number is updated: " << fnum ;
             return TRUE;
         }
     }
-    State* pa = get_state_value(list, cs, dl);
+    MyState* pa = get_state_value(list, cs, dl);
     dl->val_index.push_back(dl->var_state.size());
     dl->var_state.push_back(pa);
     dl->var_number_modified_flag.push_back(false); // new path
@@ -715,14 +715,14 @@ bool MainWindow::exec_IVEC2(QStringList& list, int& cs, LayoutData *dl){
             // just update the value in layout
             int px = get_int_value(list, cs, dl); // takes value from the beginig
             int py = get_int_value(list, cs, dl);
-            dl->var_ivec2[dl->val_index[v_idx]] = QPoint(px,py);
+            dl->var_ivec2[dl->val_index[v_idx]] = new QPoint(px,py);
             return TRUE;
         }
     }
     int px = get_int_value(list, cs, dl); // takes value from the beginig
     int py = get_int_value(list, cs, dl);
     dl->val_index.push_back(dl->var_ivec2.size());
-    dl->var_ivec2.push_back(QPoint(px,py)); //file name
+    dl->var_ivec2.push_back(new QPoint(px,py)); //file name
     qDebug() << "ivec2 is added " << dl->var_ivec2[dl->var_ivec2.size()-1] ;
     return TRUE;
 }
@@ -758,7 +758,7 @@ int MainWindow::get_int_value(QStringList& list, int& cs, LayoutData *dl){
         if ( val_idx >= 0 ){ // have variable
             if (dl->var_type[val_idx] == INTN){
                 //qDebug() << "got number" << ar->var_number[ar->val_index[val_idx]];
-                return dl->var_number[dl->val_index[val_idx]];
+                return dl->var_int_number[dl->val_index[val_idx]];
             }
         }else{
             qDebug() << "error, variable " << sv << " does not exist, fix the config file";
@@ -796,26 +796,30 @@ int MainWindow::get_int_value_from_data(QString var){
 // Getting strings parameters and prepare constructor for Path2D
 Path2D* MainWindow::get_path_value(QStringList& list, int& cs, LayoutData *dl){
     // no verification yet.
-
+    cs = cs; // not used yet
+    dl = dl; // not used yet
     return new Path2D(list);
 }
 
 // Getting strings parameters and prepare constructor State
-State* MainWindow::get_state_value(QStringList& list, int& cs, LayoutData *dl){
+MyState* MainWindow::get_state_value(QStringList& list, int& cs, LayoutData *dl){
+    cs = cs; //not used yet
     // no verification yet.
-
-    return new State(list);
+    return new MyState(list, dl);
 }
 
 // Getting strings parameters and prepare constructor State
 MyButton* MainWindow::get_button_value(QStringList& list, int& cs, LayoutData *dl){
+    cs = cs; //not used yet
     // no verification yet.
-    return new MyButton(list);
+    return new MyButton(list, dl);
 }
 
 
 // Getting strings parameters and prepare constructor State
 SimpleLayout* MainWindow::get_slayout_value(QStringList& list, int& cs, LayoutData *dl){
+    cs = cs; //not used yet
+    dl = dl;
     // no verification yet.
     return new SimpleLayout(list);
 }

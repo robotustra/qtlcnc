@@ -1,6 +1,6 @@
 #include "layoutobject.h"
 
-LayoutObject::LayoutObject()
+MyLayoutObject::MyLayoutObject()
 {
-
+    visible = true;
 }
