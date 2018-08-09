@@ -31,11 +31,17 @@ void MyButton::drawLayoutObject(QPainter &painter){
         QString us = QString("ucell");
         int ucell = ld_local->get_int_value_by_name(us);
         qDebug() << "ucell= " << ucell;
+        // get paths, it could be more than 1 path.
+
+
+
         // get color
         QString bgcolor = cs->get_bgColor(ld_local, 0);
         qDebug() << "bgcol = " << bgcolor;
         QString pencolor = cs->get_pColor(ld_local, 0);
         qDebug() << "pcol = " << pencolor;
+
+        //
 
 
     }
