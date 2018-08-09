@@ -49,4 +49,4 @@ FORMS    += mainwindow.ui
 
 CONFIG += c++11
 
-LIBS += -LC:\Qt5\5.10.0\mingw53_32\lib\ -lopengl32
+#LIBS += -LC:\Qt5\5.10.0\mingw53_32\lib\ -lopengl32

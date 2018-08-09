@@ -57,3 +57,25 @@ QPoint* MyState::get_Size(LayoutData * ld){
     return point;
 
 }
+
+//ctype = "BGCOL" or "PCOL"
+QString MyState::get_Color(LayoutData * ld, const char* ctype){
+
+    if ( size_var_name.isEmpty()){
+        //trying to parse and
+        for (int i=1; i < ss.size(); i++) {
+            if (0 == QString::compare(ctype, ss[i], Qt::CaseSensitive )){
+                pos_var_name = ss[i-1];
+                break;
+            }
+        }
+    }
+    // now we shoud have the position variable name.
+    if (!pos_var_name.isEmpty()){
+        // get variable data
+        return ld->get_string_value_by_name(pos_var_name);
+
+    }
+    return QString();
+
+}

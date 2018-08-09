@@ -69,14 +69,15 @@ int MainWindow::load_config(QString fname){
         is_updating = false;
         ld = new LayoutData(fname);
         this->ld = ld;
-        //qDebug() << "new layoutdata =" << ld;
+        qDebug() << "new layoutdata =" << ld;
     }
+    qDebug() << "parsing = " << ld->is_parsing;
     if (ld->is_parsing){ return -1;}
     ld->is_parsing = true;
     // if the nile name of layout is different from this one - it should be reloaded
     // completely.
     if ( !fname.isEmpty() ){
-        //qDebug()<< fname;
+        qDebug()<< fname;
         // parsing loayout configuration
         QFile file(fname);
         if (!file.open(QIODevice::ReadOnly))
@@ -93,7 +94,7 @@ int MainWindow::load_config(QString fname){
         while (true)
         {
             QString line0 = textStream.readLine();
-            //qDebug()<< line0;
+            qDebug()<< line0;
             if (line0.isNull())
                 break;
             else

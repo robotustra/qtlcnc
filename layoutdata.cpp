@@ -5,6 +5,7 @@
 
 LayoutData::LayoutData(QString filename)
 {
+    is_parsing = false;
     this->filename = filename;
     current_layout = -1;
 }
@@ -260,3 +261,18 @@ int LayoutData::get_int_value_by_name(QString& int_name){
     return 0;
 }
 
+
+QString  LayoutData::get_string_value_by_name(QString& str_name){
+    qDebug() << "looking for var: " << str_name;
+    int val_idx = is_var_exist(this, str_name);
+    qDebug() << " var idx: " << val_idx;
+    if ( val_idx >= 0 ){ // have variable
+        if (this->var_type[val_idx] == STRI){
+            qDebug() << " var type: " << var_type[val_idx];
+            return var_string[this->val_index[val_idx]];
+        }
+    }else{
+        qDebug() << "error, variable " << str_name << " does not exist, fix the config file";
+    }
+    return QString();
+}

@@ -73,6 +73,8 @@ public:
     MyState * get_state_object_by_name(QString& obj_name);
     QPoint* get_pos_var_by_name(QString & pos_name);
     int get_int_value_by_name(QString& int_name);
+    QString get_string_value_by_name(QString& str_name);
+
 
 
 

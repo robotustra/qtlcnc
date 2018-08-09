@@ -20,6 +20,7 @@ int main(int argc, char *argv[])
     }else{
         fname = "../qtlcnc/qtlcnc_layouts.ini";
     }
+    qDebug() << fname;
     int r = w.load_config(fname);
     if (r<0){
         perror("Can't load any layout file of file is incorrect\n");

@@ -14,6 +14,7 @@ public:
 
     QPoint* get_Position(LayoutData * ld);    // returns the position in the
     QPoint* get_Size(LayoutData * ld);    // returns the position in the
+    QString get_Color(LayoutData * ld, const char* ctype);
 
 
 private:
