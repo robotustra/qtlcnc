@@ -14,7 +14,8 @@ public:
 
     QPoint* get_Position(LayoutData * ld);    // returns the position in the
     QPoint* get_Size(LayoutData * ld);    // returns the position in the
-    QString get_Color(LayoutData * ld, const char* ctype);
+    QString get_bgColor(LayoutData * ld, int path_num);
+    QString get_pColor(LayoutData * ld, int pathnum);
 
 
 private:
@@ -23,7 +24,7 @@ private:
     QString pos_var_name;
     QString size_var_name;
     QStringList bgcolor_var_names; // a background which is used for the corresponding path
-    QStringList pcolot_var_name; // a pen list is corresponding to path
+    QStringList pcolor_var_name; // a pen list is corresponding to path
     QStringList path_var_names; // all pathes are drawn
     QString cmd_var_name; // a command line which is send to interpreter when object (button) state is activated
     QString txt_var_name; // a scriptire which is displayer on the button

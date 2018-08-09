@@ -59,25 +59,51 @@ QPoint* MyState::get_Size(LayoutData * ld){
 }
 
 //ctype = "BGCOL" or "PCOL"
-QString MyState::get_Color(LayoutData * ld, const char* ctype){
-    //
-    bgcolor_var_names is a string list!!!!
-
-    if (  .isEmpty()){
+QString MyState::get_bgColor(LayoutData * ld, int state_idx){
+    if (bgcolor_var_names.size() == 0) //is a string list!!!!
+    {
         //trying to parse and
         for (int i=1; i < ss.size(); i++) {
-            if (0 == QString::compare(QString(ctype), ss[i], Qt::CaseSensitive )){
-                pos_var_name = ss[i-1];
-                break;
+            if (0 == QString::compare( "BGCOL" , ss[i], Qt::CaseSensitive )){
+                bgcolor_var_names.push_back( ss[i-1] );
             }
         }
     }
     // now we shoud have the position variable name.
-    if (!pos_var_name.isEmpty()){
+    if (bgcolor_var_names.size()>0){
         // get variable data
-        return ld->get_string_value_by_name(pos_var_name);
+        if (state_idx >=0 && (state_idx < bgcolor_var_names.size()))
+            return ld->get_string_value_by_name(bgcolor_var_names[state_idx]);
+        else
+        {
+            qDebug() << "index of states is more than the number of bg colors";
+            return ld->get_string_value_by_name(bgcolor_var_names[0]); // just return the first coler
+        }
 
     }
     return QString();
+}
 
+QString MyState::get_pColor(LayoutData * ld, int state_idx){
+    if (pcolor_var_name.size() == 0) //is a string list!!!!
+    {
+        //trying to parse and
+        for (int i=1; i < ss.size(); i++) {
+            if (0 == QString::compare( "PCOL" , ss[i], Qt::CaseSensitive )){
+                pcolor_var_name.push_back( ss[i-1] );
+            }
+        }
+    }
+    // now we shoud have the position variable name.
+    if (pcolor_var_name.size()>0){
+        // get variable data
+        if (state_idx >=0 && (state_idx < pcolor_var_name.size()))
+            return ld->get_string_value_by_name(pcolor_var_name[state_idx]);
+        else
+        {
+            qDebug() << "index of states is more than the number of bg colors";
+            return ld->get_string_value_by_name(pcolor_var_name[0]); // just return the first coler
+        }
+    }
+    return QString();
 }
