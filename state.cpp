@@ -60,11 +60,13 @@ QPoint* MyState::get_Size(LayoutData * ld){
 
 //ctype = "BGCOL" or "PCOL"
 QString MyState::get_Color(LayoutData * ld, const char* ctype){
+    //
+    bgcolor_var_names is a string list!!!!
 
-    if ( size_var_name.isEmpty()){
+    if (  .isEmpty()){
         //trying to parse and
         for (int i=1; i < ss.size(); i++) {
-            if (0 == QString::compare(ctype, ss[i], Qt::CaseSensitive )){
+            if (0 == QString::compare(QString(ctype), ss[i], Qt::CaseSensitive )){
                 pos_var_name = ss[i-1];
                 break;
             }
