@@ -21,9 +21,9 @@ bool MyState::update_state_fields(LayoutData * ld){
 
 QPoint * MyState::get_Position(LayoutData * ld){
     QPoint * point = NULL;
+
+    pos_var_name.clear(); // reparse every time.
     if ( pos_var_name.isEmpty()){
-        //trying to parse and
-        qDebug() << ".........error in here....state string" << ss ;
         for (int i=1; i < ss.size(); i++) {
             if (0 == QString::compare("POS", ss[i], Qt::CaseSensitive )){
 
@@ -43,8 +43,8 @@ QPoint * MyState::get_Position(LayoutData * ld){
 
 QPoint* MyState::get_Size(LayoutData * ld){
     QPoint * point = NULL;
+    size_var_name.clear(); //reparse every time for now.
     if ( size_var_name.isEmpty()){
-        //trying to parse and
         for (int i=1; i < ss.size(); i++) {
             if (0 == QString::compare("SIZE", ss[i], Qt::CaseSensitive )){
                 pos_var_name = ss[i-1];
