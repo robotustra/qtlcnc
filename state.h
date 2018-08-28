@@ -16,6 +16,7 @@ public:
     QPoint* get_Size(LayoutData * ld);    // returns the position in the
     QString get_bgColor(LayoutData * ld, int path_num);
     QString get_pColor(LayoutData * ld, int pathnum);
+    Path2D* get_Pix(LayoutData * ld, int path_num);
 
 
 private:

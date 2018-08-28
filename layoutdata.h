@@ -74,6 +74,7 @@ public:
     QPoint* get_pos_var_by_name(QString & pos_name);
     int get_int_value_by_name(QString& int_name);
     QString get_string_value_by_name(QString& str_name);
+    Path2D * get_path_value_by_name(QString& str_name);
 
 
 

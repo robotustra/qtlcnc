@@ -276,3 +276,19 @@ QString  LayoutData::get_string_value_by_name(QString& str_name){
     }
     return QString();
 }
+
+Path2D * LayoutData::get_path_value_by_name(QString &str_name){
+    qDebug() << "looking for var: " << str_name;
+    int val_idx = is_var_exist(this, str_name);
+    qDebug() << " var idx: " << val_idx;
+    if ( val_idx >= 0 ){ // have variable
+        if (this->var_type[val_idx] == PATH){
+            qDebug() << " var type: " << var_type[val_idx];
+            return var_path[this->val_index[val_idx]];
+        }
+    }else{
+        qDebug() << "error, variable " << str_name << " does not exist, fix the config file";
+    }
+    return NULL;
+
+}

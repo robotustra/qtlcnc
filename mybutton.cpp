@@ -25,21 +25,23 @@ void MyButton::drawLayoutObject(QPainter &painter){
         qDebug() << "got state " <<  elements [current_state] ;
         QPoint * pt = cs->get_Position(ld_local);
         qDebug() << "pt x= " << pt->x() << "pt y = " << pt->y();
-        pt = cs->get_Size(ld_local);
-        qDebug() << "size x= " << pt->x() << "size y = " << pt->y();
+        QPoint * sz = cs->get_Size(ld_local);
+        qDebug() << "size x= " << sz->x() << "size y = " << sz->y();
         // get the unit size
         QString us = QString("ucell");
         int ucell = ld_local->get_int_value_by_name(us);
         qDebug() << "ucell= " << ucell;
-        // get paths, it could be more than 1 path.
-
-
 
         // get color
         QString bgcolor = cs->get_bgColor(ld_local, 0);
         qDebug() << "bgcol = " << bgcolor;
         QString pencolor = cs->get_pColor(ld_local, 0);
         qDebug() << "pcol = " << pencolor;
+
+        // get PIX
+        Path2D * pix = cs->get_Pix(ld_local, 0);
+
+        pix->drawPath(painter, pencolor, bgcolor, pt, sz, ucell );
 
         //
 

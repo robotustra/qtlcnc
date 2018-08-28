@@ -23,9 +23,12 @@ QPoint * MyState::get_Position(LayoutData * ld){
     QPoint * point = NULL;
     if ( pos_var_name.isEmpty()){
         //trying to parse and
+        qDebug() << ".........error in here....state string" << ss ;
         for (int i=1; i < ss.size(); i++) {
             if (0 == QString::compare("POS", ss[i], Qt::CaseSensitive )){
+
                 pos_var_name = ss[i-1];
+                qDebug()<< " position string " << pos_var_name;
                 break;
             }
         }
@@ -45,6 +48,7 @@ QPoint* MyState::get_Size(LayoutData * ld){
         for (int i=1; i < ss.size(); i++) {
             if (0 == QString::compare("SIZE", ss[i], Qt::CaseSensitive )){
                 pos_var_name = ss[i-1];
+                 qDebug()<< " size string " << pos_var_name;
                 break;
             }
         }
@@ -106,4 +110,29 @@ QString MyState::get_pColor(LayoutData * ld, int state_idx){
         }
     }
     return QString();
+}
+
+// Could be a path to draw or a picture. For now Path only.
+Path2D * MyState::get_Pix(LayoutData * ld, int path_num){
+    if (path_var_names.size() == 0) //string list is empty
+    {
+        //trying to parse and
+        for (int i=1; i < ss.size(); i++) {
+            if (0 == QString::compare( "PIX" , ss[i], Qt::CaseSensitive )){
+                path_var_names.push_back( ss[i-1] );
+            }
+        }
+    }
+    // now we shoud have the position variable name.
+    if (path_var_names.size()>0){
+        // get variable data
+        if (path_num >=0 && (path_num < path_var_names.size()))
+            return ld->get_path_value_by_name(path_var_names[path_num]);
+        else
+        {
+            qDebug() << "index of states is more than the number of pathes";
+            return ld->get_path_value_by_name(path_var_names[0]); // just return the first path
+        }
+    }
+    return NULL;
 }
