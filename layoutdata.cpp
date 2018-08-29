@@ -46,7 +46,7 @@ void LayoutData::draw_layout(QPainter &painter){
         qDebug() << "setting default layout to 0";
     }
 
-    qDebug() << "num simple layouts: " << var_slayout.size();
+    //qDebug() << "num simple layouts: " << var_slayout.size();
 
     SimpleLayout * sl = NULL;
     for(uint i=0; i<var_slayout.size(); i++){
@@ -61,111 +61,53 @@ void LayoutData::draw_layout(QPainter &painter){
         return;
     }
 
-    qDebug()<< "layout elments to display: " << sl->elements ;
+    //qDebug()<< "layout elments to display: " << sl->elements ;
     for (int i=0; i < sl->elements.size(); i++){
         int t;
         MyLayoutObject * lo = get_layout_object_by_name(sl->elements[i], &t);
         if (t == BUTTON){
             MyButton * mb = (MyButton*) lo;
             mb->drawLayoutObject(painter);
-
         }
     }
 
-
-
-    /*
-    static const QPoint points[4] = {
-        QPoint(10, 10),
-        QPoint(90, 10),
-        QPoint(90, 90),
-        QPoint(10, 90)
-    };
-    */
-    // example
-    //painter.drawRect(0, 0, 100,100);
-    //QRect rect(10, 20, 80, 60);
-
-
-    //QRect rect(0, 0, ucell-border, ucell-border);
-
-
-    /*
-    QPainterPath path;
-    path.moveTo(20, 80);
-    path.lineTo(20, 30);
-    path.cubicTo(80, 0, 50, 50, 80, 80);
-
-    int startAngle = 20 * 16;
-    int arcLength = 120 * 16;
-
-    QLinearGradient lg(0,0,100,100);
-    */
-    //brush = QBrush("gray", Qt::LinearGradientPattern);
-    /*brush = QBrush(Qt::NoBrush);
-    painter.setBrush(brush);
-    */
-    /*
-    shape = Rect;
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    */
-    /*for (int x = 0; x < ggeom.width() * ucell; x += ucell) {
-        for (int y = 0; y < ggeom.height() * ucell; y += ucell) {
-            painter.save();
-            painter.translate(loffset.x() + x, loffset.y() + y);
-            / *
-            if (transformed) {
-                painter.translate(50, 50);
-                painter.rotate(60.0);
-                painter.scale(0.6, 0.9);
-                painter.translate(-50, -50);
-            }* /
-
-            switch (shape) {
-            case Line:
-                painter.drawLine(rect.bottomLeft(), rect.topRight());
-                break;
-            case Points:
-                //painter.drawPoints(points, 4);
-                break;
-            case Polyline:
-                painter.drawPolyline(points, 4);
-                break;
-            case Polygon:
-                painter.drawPolygon(points, 4);
-                break;
-            case Rect:
-                painter.drawRect(rect);
-                break;
-            case RoundedRect:
-                painter.drawRoundedRect(rect, 25, 25, Qt::RelativeSize);
-                break;
-            case Ellipse:
-                painter.drawEllipse(rect);
-                break;
-            case Arc:
-                painter.drawArc(rect, startAngle, arcLength);
-                break;
-            case Chord:
-                painter.drawChord(rect, startAngle, arcLength);
-                break;
-            case Pie:
-                painter.drawPie(rect, startAngle, arcLength);
-                break;
-            case Path:
-                painter.drawPath(path);
-                break;
-            case Text:
-                painter.drawText(rect, Qt::AlignCenter, tr("Qt by\nNokia"));
-                break;
-            case Pixmap:
-                painter.drawPixmap(10, 10, pixmap);
-            }
-            painter.restore();
+}
+// look up all all layout elements and finds which one is at the position
+MyLayoutObject * LayoutData::get_layout_object_at_mouse_pos(QPoint pos, int * type){
+    MyLayoutObject * mlo = NULL;
+    if (current_layout < 0 && var_slayout.size() > 0){
+        current_layout = 0;
+        var_slayout[0]->selected = true;
+        qDebug() << "setting default layout to 0";
+    }
+    SimpleLayout * sl = NULL;
+    for(uint i=0; i<var_slayout.size(); i++){
+        if (var_slayout[i]->selected == true) {
+            sl = var_slayout[i];
+            break;
         }
-    }*/
+    }
+    if (sl == NULL) {
+        qDebug() << "no active layout. Add layouts in the .ini file";
+        return NULL;
+    }
+    //qDebug()<< "layout elments to display: " << sl->elements ;
+    for (int i=0; i < sl->elements.size(); i++){
+        int t;
+        MyLayoutObject * lo = get_layout_object_by_name(sl->elements[i], &t);
+        if (t == BUTTON){
+            //qDebug() << "button found " << sl->elements[i];
+            MyButton * mb = (MyButton*) lo;
+            if (mb->isCursorOver(pos)) {
+                mlo = lo;
+                *type = t;
+                break;
+            }
+        }
+        // .. add other objects
+    }
 
-
+    return mlo;
 }
 
 bool LayoutData::is_the_same_file(QString fn){
@@ -186,35 +128,35 @@ MyLayoutObject* LayoutData::get_layout_object_by_name(QString& obj_name, int * t
     switch (t) {
     case BUTTON:
         l_obj = var_mybutton[val_index[idx]];
-        qDebug() << "have button: idx =" << val_index[idx] << "name = " << var_name[idx] << "addres =" << l_obj;
+        //qDebug() << "have button: idx =" << val_index[idx] << "name = " << var_name[idx] << "addres =" << l_obj;
         break;
     case LABEL:
         l_obj = var_label[val_index[idx]];
-        qDebug() << "have lavel: idx =" << val_index[idx] << "name = " << var_name[idx];
+        //qDebug() << "have lavel: idx =" << val_index[idx] << "name = " << var_name[idx];
         break;
     case LIND:
          l_obj = var_indicator[val_index[idx]];
-        qDebug() << "have indicator: idx =" << val_index[idx] << "name = " << var_name[idx];
+        //qDebug() << "have indicator: idx =" << val_index[idx] << "name = " << var_name[idx];
         break;
     case KNOB:
          l_obj = var_knob[val_index[idx]];
-        qDebug() << "have knob: idx =" << val_index[idx] << "name = " << var_name[idx];
+        //qDebug() << "have knob: idx =" << val_index[idx] << "name = " << var_name[idx];
         break;
     case GLVIEW:
         l_obj = var_glview[val_index[idx]]; // contains data for opengl element
-        qDebug() << "have glview: idx =" << val_index[idx] << "name = " << var_name[idx];
+        //qDebug() << "have glview: idx =" << val_index[idx] << "name = " << var_name[idx];
         break;
     case GCODEVIEW:
         l_obj = var_gcodeview[val_index[idx]];
-        qDebug() << "have codeview: idx =" << val_index[idx] << "name = " << var_name[idx];
+        //qDebug() << "have codeview: idx =" << val_index[idx] << "name = " << var_name[idx];
         break;
     case GCODEEDIT:
         l_obj = var_gcodeedit[val_index[idx]];
-        qDebug() << "have codeview: idx =" << val_index[idx] << "name = " << var_name[idx];
+        //qDebug() << "have codeview: idx =" << val_index[idx] << "name = " << var_name[idx];
         break;
 
     default:
-        qDebug() << "object idx =" << val_index[idx] << "is not a type of object for layout element";
+        //qDebug() << "object idx =" << val_index[idx] << "is not a type of object for layout element";
         break;
     }
 
@@ -229,7 +171,7 @@ MyState * LayoutData::get_state_object_by_name(QString& obj_name){
     int t = var_type[idx];
     if (t == STATE){
         s_obj = var_state [val_index[idx]];
-        qDebug() << "have state: idx =" << val_index[idx] << "name = " << var_name[idx] << "addres =" << s_obj;
+        //qDebug() << "have state: idx =" << val_index[idx] << "name = " << var_name[idx] << "addres =" << s_obj;
     }
      return s_obj; // if it's not a state object, return NULL;
 }
@@ -241,18 +183,18 @@ QPoint * LayoutData::get_pos_var_by_name(QString & pos_name){
     int t = var_type[idx];
     if (t == IVEC2){
         pt = var_ivec2 [val_index[idx]];
-        qDebug() << "have point: idx =" << val_index[idx] << "name = " << var_name[idx] << "addres =" << pt;
+        //qDebug() << "have point: idx =" << val_index[idx] << "name = " << var_name[idx] << "addres =" << pt;
     }
     return pt; // it's a reference to the point;
 }
 
 int LayoutData::get_int_value_by_name(QString& int_name){
-    qDebug() << "looking for var: " << int_name;
+    //qDebug() << "looking for var: " << int_name;
     int val_idx = is_var_exist(this, int_name);
-    qDebug() << " var idx: " << val_idx;
+    //qDebug() << " var idx: " << val_idx;
     if ( val_idx >= 0 ){ // have variable
         if (this->var_type[val_idx] == INTN){
-            qDebug() << " var type: " << var_type[val_idx];
+            //qDebug() << " var type: " << var_type[val_idx];
             return var_int_number[this->val_index[val_idx]];
         }
     }else{
@@ -263,12 +205,12 @@ int LayoutData::get_int_value_by_name(QString& int_name){
 
 
 QString  LayoutData::get_string_value_by_name(QString& str_name){
-    qDebug() << "looking for var: " << str_name;
+    //qDebug() << "looking for var: " << str_name;
     int val_idx = is_var_exist(this, str_name);
-    qDebug() << " var idx: " << val_idx;
+    //qDebug() << " var idx: " << val_idx;
     if ( val_idx >= 0 ){ // have variable
         if (this->var_type[val_idx] == STRI){
-            qDebug() << " var type: " << var_type[val_idx];
+            //qDebug() << " var type: " << var_type[val_idx];
             return var_string[this->val_index[val_idx]];
         }
     }else{
@@ -278,17 +220,44 @@ QString  LayoutData::get_string_value_by_name(QString& str_name){
 }
 
 Path2D * LayoutData::get_path_value_by_name(QString &str_name){
-    qDebug() << "looking for var: " << str_name;
+    //qDebug() << "looking for var: " << str_name;
     int val_idx = is_var_exist(this, str_name);
-    qDebug() << " var idx: " << val_idx;
+    //qDebug() << " var idx: " << val_idx;
     if ( val_idx >= 0 ){ // have variable
         if (this->var_type[val_idx] == PATH){
-            qDebug() << " var type: " << var_type[val_idx];
+            //qDebug() << " var type: " << var_type[val_idx];
             return var_path[this->val_index[val_idx]];
         }
     }else{
         qDebug() << "error, variable " << str_name << " does not exist, fix the config file";
     }
     return NULL;
+
+}
+/*
+*   This function receive the command from layout element and can modify any state of the window.
+*   It can send the messages to linuxcnc system (later).
+*/
+void LayoutData::processCommand(QString & cmd){
+    /*
+        Command consisnt of name of variables in the layout data and can modify it.
+        For button the number means the state.
+        "button:1" means that the button state will be switched to state 1.
+
+    */
+    QStringList cmd_list = cmd.split(" ");
+    for (int i=0; i < cmd_list.size(); i++){
+        // select the name of object
+        QString tmp = cmd_list[i];
+        if (!tmp.isEmpty() && tmp.contains(":")){
+            QStringList obj = tmp.split(":");
+
+            QString obj_name = obj[0];
+            qDebug() << "object name " << obj_name;
+            QString obj_param = obj[1];
+            qDebug() << "obj_param " << obj_param;
+        }
+
+    }
 
 }

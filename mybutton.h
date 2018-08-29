@@ -16,7 +16,9 @@ public:
     void getLayoutObjectStatus();
     void setLayoutObjectPropertiy();
     void getLayoutObjectPropertiy();
+    bool isCursorOver(QPoint &pos);
     MyState* getState(LayoutData* ld, QString state_name);
+    QString get_active_state_command();
 
 private:
 

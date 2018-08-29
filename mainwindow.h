@@ -81,6 +81,10 @@ protected:
 
 protected:
     void paintEvent(QPaintEvent * e);
+    void mousePressEvent(QMouseEvent *e);
+    void mouseMoveEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *e);
+    void wheelEvent(QWheelEvent *event);
     
 private:
     Ui::MainWindow *ui;
@@ -104,6 +108,7 @@ private:
     LayoutData* ld; // All screen layouts for this application
     bool multiline_comment_on;
     bool is_updating;
+    QPoint last_pos;
 
 };
 

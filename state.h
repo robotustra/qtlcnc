@@ -17,6 +17,8 @@ public:
     QString get_bgColor(LayoutData * ld, int path_num);
     QString get_pColor(LayoutData * ld, int pathnum);
     Path2D* get_Pix(LayoutData * ld, int path_num);
+    QString get_command(LayoutData * ld); // return the command string associated with this state when activated
+    int get_paths_number();
 
 
 private:

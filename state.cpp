@@ -28,7 +28,7 @@ QPoint * MyState::get_Position(LayoutData * ld){
             if (0 == QString::compare("POS", ss[i], Qt::CaseSensitive )){
 
                 pos_var_name = ss[i-1];
-                qDebug()<< " position string " << pos_var_name;
+                //qDebug()<< " position string " << pos_var_name;
                 break;
             }
         }
@@ -48,7 +48,7 @@ QPoint* MyState::get_Size(LayoutData * ld){
         for (int i=1; i < ss.size(); i++) {
             if (0 == QString::compare("SIZE", ss[i], Qt::CaseSensitive )){
                 pos_var_name = ss[i-1];
-                 qDebug()<< " size string " << pos_var_name;
+                //qDebug()<< " size string " << pos_var_name;
                 break;
             }
         }
@@ -80,7 +80,7 @@ QString MyState::get_bgColor(LayoutData * ld, int state_idx){
             return ld->get_string_value_by_name(bgcolor_var_names[state_idx]);
         else
         {
-            qDebug() << "index of states is more than the number of bg colors";
+            //qDebug() << "index of states is more than the number of bg colors";
             return ld->get_string_value_by_name(bgcolor_var_names[0]); // just return the first coler
         }
 
@@ -105,7 +105,7 @@ QString MyState::get_pColor(LayoutData * ld, int state_idx){
             return ld->get_string_value_by_name(pcolor_var_name[state_idx]);
         else
         {
-            qDebug() << "index of states is more than the number of bg colors";
+            //qDebug() << "index of states is more than the number of bg colors";
             return ld->get_string_value_by_name(pcolor_var_name[0]); // just return the first coler
         }
     }
@@ -130,9 +130,32 @@ Path2D * MyState::get_Pix(LayoutData * ld, int path_num){
             return ld->get_path_value_by_name(path_var_names[path_num]);
         else
         {
-            qDebug() << "index of states is more than the number of pathes";
+            //qDebug() << "index of states is more than the number of pathes";
             return ld->get_path_value_by_name(path_var_names[0]); // just return the first path
         }
     }
     return NULL;
+}
+
+int MyState::get_paths_number(){
+    int numb = 0;
+    for (int i=1; i < ss.size(); i++) {
+        if (0 == QString::compare( "PIX" , ss[i], Qt::CaseSensitive )){
+            numb++;
+        }
+    }
+    return numb;
+}
+
+QString MyState::get_command(LayoutData * ld){
+    if (cmd_var_name.isEmpty())
+    {
+        //trying to parse and
+        for (int i=1; i < ss.size(); i++) {
+            if (0 == QString::compare( "CMDL" , ss[i], Qt::CaseSensitive )){
+                cmd_var_name = ss[i-1];
+            }
+        }
+    }
+    return ld->get_string_value_by_name(cmd_var_name);
 }

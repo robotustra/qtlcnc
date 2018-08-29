@@ -43,6 +43,58 @@ void MainWindow::paintEvent(QPaintEvent * e){
 
     ld->draw_layout(painter);
 }
+// Mouse position handling for layout elements
+void MainWindow::mousePressEvent(QMouseEvent *event){
+    last_pos = event->pos();
+    // look up the layout object.
+    MyLayoutObject * obj = NULL;
+    int o_type;
+    QString cmd = QString();
+    obj = ld->get_layout_object_at_mouse_pos(event->pos(), &o_type);
+    if (obj != NULL){
+        if (o_type == BUTTON){
+            MyButton * mb = (MyButton*) obj;
+            cmd = mb->get_active_state_command();
+
+            ui->statusBar->showMessage( "Button detected at x="+ QString::number( event->x()) + " | y=" +QString::number( event->y()) + cmd );
+        }
+        //.. check other layout objects
+
+    }else {
+        ui->statusBar->showMessage( "x="+ QString::number( event->x()) + " | y=" +QString::number( event->y()) );
+    }
+    if (!cmd.isEmpty()) {
+        ld->processCommand(cmd);
+    }
+}
+
+void MainWindow::mouseMoveEvent(QMouseEvent *event){
+    //int dx = event->x() - last_pos.x();
+    //int dy = event->y() - last_pos.y();
+
+    if (event->buttons() & Qt::LeftButton) {
+        ;;
+    } else if (event->buttons() & Qt::RightButton) {
+        ;;
+    }
+    last_pos = event->pos();
+
+}
+
+void MainWindow::mouseReleaseEvent(QMouseEvent *e){
+    last_pos = e->pos();
+}
+
+void MainWindow::wheelEvent(QWheelEvent *event)
+{
+    int delta = event->delta();
+    if(delta!=0)
+    {
+        ;;
+    }
+    last_pos = event->pos();
+}
+
 
 void MainWindow::set_ggeom(int w, int h){
     ggeom.setWidth(w);

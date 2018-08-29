@@ -70,13 +70,13 @@ public:
     void draw_layout(QPainter & painter); // draw current layout according to the current state.
     bool is_the_same_file(QString fn);
     MyLayoutObject * get_layout_object_by_name(QString& obj_name, int *type);
+    MyLayoutObject * get_layout_object_at_mouse_pos(QPoint pos, int * type);
     MyState * get_state_object_by_name(QString& obj_name);
     QPoint* get_pos_var_by_name(QString & pos_name);
     int get_int_value_by_name(QString& int_name);
     QString get_string_value_by_name(QString& str_name);
     Path2D * get_path_value_by_name(QString& str_name);
-
-
+    void processCommand(QString & cmd);
 
 
 protected:
