@@ -256,6 +256,16 @@ void LayoutData::processCommand(QString & cmd){
             qDebug() << "object name " << obj_name;
             QString obj_param = obj[1];
             qDebug() << "obj_param " << obj_param;
+            int t;
+            MyLayoutObject * lo = get_layout_object_by_name(obj_name, &t);
+            if (t == BUTTON){
+                MyButton * mb = (MyButton*) lo;
+                int new_state = obj_param.toInt();
+                if ( !(mb->setState(new_state)) ){
+                    qDebug() << "cannot change batton state" ;
+                }
+
+            }
         }
 
     }

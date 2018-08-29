@@ -65,6 +65,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
     }
     if (!cmd.isEmpty()) {
         ld->processCommand(cmd);
+        update();
     }
 }
 

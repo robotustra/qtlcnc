@@ -11,6 +11,14 @@ MyButton::MyButton(QStringList & sl, LayoutData* ld)
 
 }
 
+bool MyButton::setState(int state){
+    if ( (state >= 0) && (state < elements.size())) {
+        current_state = state;
+        return true;
+    }
+    return false;
+}
+
 void MyButton::drawLayoutObject(QPainter &painter){
 // get actual data from the structure and do actual drawing of the button
     // 1) get current state
