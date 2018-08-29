@@ -33,9 +33,13 @@ void Path2D::drawPath(QPainter& painter, QString& pencolor, QString& bgcolor, QP
     //Mini parser to draw pathes !!! Must remake this parser if I want to add TEXT on buttons.
     QPainterPath path;
     for(int i = 0; i<p.size(); i++){
-        if(p[i].contains("M")){ // moveTo
+        QString p_str = p[i];
+        p_str.remove(p_str.size()-1,1);
+        p_str.remove(0,1);
+
+        if(p_str.at(0) == QChar('M')){ // moveTo
             // look for the next space or tab of eol
-            QString tmp = p[i].remove("\"");
+            QString tmp = p_str;
             tmp.remove("M");
             QStringList crd = tmp.split(",");
             float x_coor = crd[0].toFloat() * sc_x;
@@ -45,9 +49,9 @@ void Path2D::drawPath(QPainter& painter, QString& pencolor, QString& bgcolor, QP
             // cut the beginning of the string
             path.moveTo(x0+x_coor, y0+y_coor);
         }
-        if(p[i].contains("L")){ //lineTo
+        if(p_str.at(0) == QChar('L')){ //lineTo
             // look for the next space or tab of eol
-            QString tmp = p[i].remove("\"");
+            QString tmp = p_str;
             tmp.remove("L");
             QStringList crd = tmp.split(",");
             float x_coor = crd[0].toFloat() * sc_x;
@@ -56,9 +60,9 @@ void Path2D::drawPath(QPainter& painter, QString& pencolor, QString& bgcolor, QP
             // cut the beginning of the string
             path.lineTo(x0+x_coor, y0+y_coor);
         }
-        if(p[i].contains("A")){ //arcTo
+        if(p_str.at(0) == QChar('A')){ //arcTo
             // look for the next space or tab of eol
-            QString tmp = p[i].remove("\"");
+            QString tmp = p_str;
             tmp.remove("A");
             QStringList crd = tmp.split(",");
             float x = crd[0].toFloat() * sc_x; // directing vector
@@ -73,8 +77,8 @@ void Path2D::drawPath(QPainter& painter, QString& pencolor, QString& bgcolor, QP
             path.arcTo(x0+x, y0+y, w, h, ab, ae);
             //http://doc.qt.io/qt-5/qtwidgets-painting-painterpaths-example.html
         }
-        if(p[i].contains("R")){ //rectangle
-            QString tmp = p[i].remove("\"");
+        if(p_str.at(0) == QChar('R')){ //rectangle
+            QString tmp = p_str;
             tmp.remove("R");
             QStringList crd = tmp.split(",");
             float x = crd[0].toFloat() * sc_x; // directing vector
@@ -85,8 +89,8 @@ void Path2D::drawPath(QPainter& painter, QString& pencolor, QString& bgcolor, QP
             path.addRect(x0+x, y0+y, w, h);
 
         }
-        if(p[i].contains("P")){ //rounded rectangle
-            QString tmp = p[i].remove("\"");
+        if(p_str.at(0) == QChar('P')){ //rounded rectangle
+            QString tmp = p_str;
             tmp.remove("P");
             QStringList crd = tmp.split(",");
             float x = crd[0].toFloat() * sc_x; // directing vector
@@ -99,7 +103,7 @@ void Path2D::drawPath(QPainter& painter, QString& pencolor, QString& bgcolor, QP
             path.addRoundedRect(x0+x, y0+y, w, h,rx,ry);
 
         }
-        if(p[i].contains("X")){ //closeSubpath
+        if(p_str.at(0) == QChar('X')){ //closeSubpath
             path.closeSubpath();
         }
     }
