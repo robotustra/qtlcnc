@@ -32,13 +32,15 @@ void Path2D::drawPath(QPainter& painter, QString& pencolor, QString& bgcolor, QP
     //Mini parser to draw pathes
     QPainterPath path;
     for(int i = 0; i<p.size(); i++){
-        /*if(p[i].contains("M")){ // moveTo
+        if(p[i].contains("M")){ // moveTo
             // look for the next space or tab of eol
             QString tmp = p[i].remove("\"");
             tmp.remove("M");
             QStringList crd = tmp.split(",");
             float x_coor = crd[0].toFloat();
             float y_coor = crd[1].toFloat();
+            x_coor *= sx/100.0;
+            y_coor *= sy/100.0;
             qDebug()<< "Move to: x_coord = " << x_coor << "y_coord =" <<y_coor;
             // cut the beginning of the string
             path.moveTo(x0+x_coor, y0+y_coor);
@@ -50,39 +52,33 @@ void Path2D::drawPath(QPainter& painter, QString& pencolor, QString& bgcolor, QP
             QStringList crd = tmp.split(",");
             float x_coor = crd[0].toFloat();
             float y_coor = crd[1].toFloat();
+            x_coor *= sx/100.0;
+            y_coor *= sy/100.0;
             qDebug()<< "Line to: x_coord = " << x_coor << "y_coord =" <<y_coor;
             // cut the beginning of the string
             path.lineTo(x0+x_coor, y0+y_coor);
-        }*/
-        if(p[i].contains("A")){ //To
+        }
+        if(p[i].contains("A")){ //arcTo
             // look for the next space or tab of eol
             QString tmp = p[i].remove("\"");
             tmp.remove("A");
             QStringList crd = tmp.split(",");
-            float vx = crd[0].toFloat(); // directing vector
-            float vy = crd[1].toFloat();
-            float angle = crd[2].toFloat();
-            float rad = crd[3].toFloat();
-            float start_angle = 0;
-            // directing vector
-            if (vx == 1 && vy == 0) start_angle = 90.0;
-            if (vx == -1 && vy == 0) start_angle = 270.0;
-            if (vx == 0 && vy == 1) start_angle = 0.0;
-            if (vx == 0 && vy == -1) start_angle = 180.0;
+            float x = crd[0].toFloat(); // directing vector
+            float y = crd[1].toFloat();
+            float w = crd[2].toFloat();
+            float h = crd[3].toFloat();
+            x *= sx/100.0;
+            y *= sy/100.0;
+            w *= sx/100.0;
+            h *= sy/100.0;
 
-            qDebug()<< "arc to: vx=" << vx << "vy=" << vy << "a=" << angle << " rad= " <<rad;
+            float ab = crd[4].toFloat();
+            float ae = crd[5].toFloat();
+
+            qDebug()<< "arc to: x=" << x << "y=" << y << "w=" << w << " h= " << h;
             // cut the beginning of the string
 
-            //path.arcTo(x0, y0, 2*rad, 2*rad, start_angle, start_angle + angle);
-            //path.arcTo(100, 100, 50, 50, 0, -90);
-            path.moveTo(80.0, 35.0);
-            path.arcTo(70.0, 30.0, 10.0, 10.0, 0.0, 90.0);
-            path.lineTo(25.0, 30.0);
-            path.arcTo(20.0, 30.0, 10.0, 10.0, 90.0, 90.0);
-            path.lineTo(20.0, 65.0);
-            path.arcTo(20.0, 60.0, 10.0, 10.0, 180.0, 90.0);
-            path.lineTo(75.0, 70.0);
-            path.arcTo(70.0, 60.0, 10.0, 10.0, 270.0, 90.0);
+            path.arcTo(x0+x, y0+y, w, h, ab, ae);
             //http://doc.qt.io/qt-5/qtwidgets-painting-painterpaths-example.html
         }
     }
