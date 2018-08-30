@@ -15,18 +15,21 @@ void Path2D::drawPath(QPainter& painter, QString& pencolor, QString& bgcolor, QP
     //qDebug() << "with size = " << sz->x() * ucell << ", " << sz->y() * ucell;
 
     painter.save();
-
-    QBrush brush = QBrush(QColor(bgcolor.replace("\"","")));
-    painter.setBrush(brush);
-    QPen pen = QPen(QColor(pencolor.replace("\"", "")), 2.0, Qt::SolidLine);
-    painter.setPen(pen);
-
     float x0 = (pos->x()-1) * ucell;
     float y0 = (pos->y()-1) * ucell;
     float sx = sz->x() * ucell;
     float sy = sz->y() * ucell;
     float sc_x = sx/100.0;
     float sc_y = sy/100.0;
+
+    painter.setRenderHint(QPainter::Antialiasing); //improve graphics!
+
+    QBrush brush = QBrush(QColor(bgcolor.replace("\"","")));
+    painter.setBrush(brush);
+    QPen pen = QPen(QColor(pencolor.replace("\"", "")), 2.0*ucell/100.0, Qt::SolidLine);
+    painter.setPen(pen);
+
+
     // this is an area to which we draw the path.
     //painter.drawRect( x0, y0, sx, sy);
 
@@ -101,6 +104,23 @@ void Path2D::drawPath(QPainter& painter, QString& pencolor, QString& bgcolor, QP
             float ry = crd[5].toFloat() * sc_y;
 
             path.addRoundedRect(x0+x, y0+y, w, h,rx,ry);
+
+        }
+
+        if(p_str.at(0) == QChar('T')){ //rounded rectangle
+            QString tmp = p_str;
+            tmp.remove(0,1); // remove T
+            // format "T<x>,<y>,<font_family>,<size>,<text>"
+            QStringList crd = tmp.split(",");
+            float x = crd[0].toFloat() * sc_x; // directing vector
+            float y = crd[1].toFloat() * sc_y;
+            QString ffont = crd[2];
+            int h = crd[3].toInt() * sc_x;
+            QString txt = crd[4];
+
+            QFont fnt = QFont(ffont,h, 1);
+
+            path.addText(x0+x,y0+y,fnt, txt);
 
         }
         if(p_str.at(0) == QChar('X')){ //closeSubpath
