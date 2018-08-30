@@ -10,7 +10,7 @@ class MyButton: public MyLayoutObject
 {
 public:
     MyButton(QStringList & sl, LayoutData *ld);
-    void drawLayoutObject( QPainter& p);
+    void drawLayoutObject(QPainter& p, QPoint &loffset);
     void selectLayoutObject();
     void setLayoutObjectStatus();
     void getLayoutObjectStatus();

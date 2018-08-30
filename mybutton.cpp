@@ -19,7 +19,7 @@ bool MyButton::setState(int state){
     return false;
 }
 
-void MyButton::drawLayoutObject(QPainter &painter){
+void MyButton::drawLayoutObject(QPainter &painter, QPoint& loffset){
 // get actual data from the structure and do actual drawing of the button
     // 1) get current state
     if (current_state < 0 ){
@@ -51,7 +51,7 @@ void MyButton::drawLayoutObject(QPainter &painter){
             // get PIX
             Path2D * pix = cs->get_Pix(ld_local, i);
 
-            pix->drawPath(painter, pencolor, bgcolor, pt, sz, ucell );
+            pix->drawPath(painter, pencolor, bgcolor, pt, sz, ucell, loffset );
         }
     }
 }

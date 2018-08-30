@@ -12,7 +12,7 @@ class Path2D
 public:
 
     Path2D(QStringList & sl);
-    void drawPath(QPainter& painter, QString& pencolor, QString& bgcolor, QPoint *pos, QPoint *sz, int ucell);
+    void drawPath(QPainter& painter, QString& pencolor, QString& bgcolor, QPoint *pos, QPoint *sz, int ucell, QPoint &loffset);
 
 
 
