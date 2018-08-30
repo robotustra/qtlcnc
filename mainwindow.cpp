@@ -40,8 +40,7 @@ void MainWindow::set_window_size(QSize s, QPoint pt){
 void MainWindow::paintEvent(QPaintEvent * e){
     QPainter painter(this);
     painter.fillRect(e->rect(), QColor(0,0,0,0));
-
-    ld->draw_layout(painter);
+    ld->draw_layout(painter, loffset);
 }
 // Mouse position handling for layout elements
 void MainWindow::mousePressEvent(QMouseEvent *event){

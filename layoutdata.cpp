@@ -39,7 +39,7 @@ int LayoutData::is_var_exist(LayoutData* ld, QString var){
     like buttons, labels, knoba, glviews, layouts and so on, and draws them.
 
 */
-void LayoutData::draw_layout(QPainter &painter){
+void LayoutData::draw_layout(QPainter &painter, QPoint& loffset){
     if (current_layout < 0 && var_slayout.size() > 0){
         current_layout = 0;
         var_slayout[0]->selected = true;
@@ -60,14 +60,13 @@ void LayoutData::draw_layout(QPainter &painter){
         qDebug() << "no active layout to draw. Add layouts in the .ini file";
         return;
     }
-
     //qDebug()<< "layout elments to display: " << sl->elements ;
     for (int i=0; i < sl->elements.size(); i++){
         int t;
         MyLayoutObject * lo = get_layout_object_by_name(sl->elements[i], &t);
         if (t == BUTTON){
             MyButton * mb = (MyButton*) lo;
-            mb->drawLayoutObject(painter);
+            mb->drawLayoutObject(painter, loffset);
         }
     }
 

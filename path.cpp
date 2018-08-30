@@ -8,15 +8,15 @@ Path2D::Path2D(QStringList &sl)
     p = sl;
 }
 
-void Path2D::drawPath(QPainter& painter, QString& pencolor, QString& bgcolor, QPoint * pos, QPoint * sz, int ucell){
+void Path2D::drawPath(QPainter& painter, QString& pencolor, QString& bgcolor, QPoint * pos, QPoint * sz, int ucell, QPoint& loffset){
      //
     //qDebug() << "drawing" << p << " with pen " << pencolor << " on bground " << bgcolor;
     //qDebug() << "at pos = " << pos->x() * ucell << ", " << pos->y() * ucell;
     //qDebug() << "with size = " << sz->x() * ucell << ", " << sz->y() * ucell;
 
     painter.save();
-    float x0 = (pos->x()-1) * ucell;
-    float y0 = (pos->y()-1) * ucell;
+    float x0 = (pos->x()-1) * ucell + loffset.x();
+    float y0 = (pos->y()-1) * ucell + loffset.y();
     float sx = sz->x() * ucell;
     float sy = sz->y() * ucell;
     float sc_x = sx/100.0;
