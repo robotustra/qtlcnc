@@ -19,6 +19,8 @@ MainWindow::MainWindow(QWidget *parent) :
     multiline_comment_on = FALSE;
     is_updating = FALSE;
     ld = NULL;
+    ui->mainToolBar->hide();
+    ui->menuBar->hide();
 }
 
 MainWindow::~MainWindow()
