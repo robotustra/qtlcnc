@@ -26,6 +26,13 @@ int main(int argc, char *argv[])
         perror("Can't load any layout file of file is incorrect\n");
         exit(1);
     }
+
+    int res = w.connect_to_server();
+    if (res < 0) {
+        qDebug()<< "GUI is not connected to the server, fix server options in ini file";
+    }
+
+
     // after that we already have some data for screen.
     // first, check if we have to setup screen automatically.
 
