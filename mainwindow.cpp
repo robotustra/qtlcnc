@@ -21,11 +21,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ld = NULL;
     ui->mainToolBar->hide();
     ui->menuBar->hide();
+    socket = NULL;
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    if (socket != NULL){
+        socket->disconnect();
+    }
 }
 
 QSize MainWindow::get_screen_size(){
@@ -848,6 +852,22 @@ int MainWindow::get_int_value_from_data(QString var){
     return res;
 }
 
+QString MainWindow::get_stri_value_from_data(QString var){
+    if (ld != NULL){
+        int v_idx = ld->is_var_exist(ld, var);
+        if (-1 != v_idx && (ld->var_type[v_idx] == STRI)){
+             QString res = ld->var_string[ld->val_index[v_idx]];
+             return res;
+        }else{
+            qDebug()<< "variable name do not exist";
+            exit (-1);
+        }
+    }
+    return NULL;
+}
+
+
+
 // Getting strings parameters and prepare constructor for Path2D
 Path2D* MainWindow::get_path_value(QStringList& list, int& cs, LayoutData *dl){
     // no verification yet.
@@ -879,3 +899,101 @@ SimpleLayout* MainWindow::get_slayout_value(QStringList& list, int& cs, LayoutDa
     return new SimpleLayout(list);
 }
 
+int MainWindow::connect_to_server(){
+    // connect to network
+    // 1) read server options from file, IP address and PORT
+    QString server_name = get_stri_value_from_data(QString("server_name"));
+    server_name.remove("\"");
+    int port = get_int_value_from_data("port");
+    qDebug() << "Connecting to " << server_name << " port =" << port;
+
+    if (socket != NULL) {
+        socket->disconnect();
+        socket = NULL;
+    }
+    socket = new QTcpSocket(this);
+
+    socket->connectToHost(server_name, port);
+    //Connect signals and slots
+    connect(socket, SIGNAL(readyRead()), this, SLOT(readData()));
+    //connect(ui->connectButton,SIGNAL(clicked()),this, SLOT(connectToServer()));
+    //connect(ui->disconnectButton,SIGNAL(clicked()), this, SLOT(disconnectFromServer()));
+    //QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
+
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(check_connection()));
+    timer->start(2000);
+    return 0;
+}
+
+void MainWindow::check_connection(){
+    if(socket == NULL) return;
+    bool connected = (socket->state() == QTcpSocket::ConnectedState);
+    if (!connected) {
+        qDebug() << "Could not connect to server";
+    }else {
+        qDebug() << "Connected";
+    }
+}
+
+//Read data from socket
+void MainWindow::readData()
+{
+    QString readLine = socket->readLine();
+    QString repl = readLine.right(5);
+    //bool ping_flag = false;
+    if (readLine.contains("PING")){
+        socket->write("PONG ");
+        socket->write(repl.toUtf8().constData());
+        //ping_flag = true;
+    }
+    qDebug()<< readLine;
+
+    if(socket->canReadLine()) readData();
+}
+
+// This function prepare the message to send to the lcncrsh via socket.
+//.............remake this template
+void MainWindow::layoutDataChanged(){
+
+    QString file_name = "../alma_output.txt";
+
+    //QString message = QString ("File changed: ") + file_name;
+    //ui->textEdit->append(message);
+    //update();
+    bool connected = (socket->state() == QTcpSocket::ConnectedState);
+
+    if (connected) {
+        QFile file(file_name); // this is a name of a file text1.txt sent from main method
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            //qDebug()<< "File is not exist yet, skipping\n";
+            return ;
+        }
+        QTextStream in(&file);
+        in.setCodec("UTF-8");
+        QString line = in.readLine();
+
+        QString reply = line + QString(" \r\n");
+        //ui->textEdit->append(reply);
+
+        socket->write("PRIVMSG #eblarus :");
+        //socket->write("PRIVMSG #belarus :");
+        socket->write(line.toUtf8().constData());
+        socket->write(" \r\n");
+        socket->flush();
+
+        file.close();
+        QFile file1(file_name);
+        file1.remove();
+    }
+}
+
+void MainWindow::disconnectFromServer()
+{
+    timer->stop();
+
+    socket->write("QUIT Good bye \r\n");
+    socket->flush();
+    socket->disconnect();
+}

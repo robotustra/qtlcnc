@@ -9,6 +9,8 @@
 #include <QPixmap>
 #include <QWidget>
 #include <QPainter>
+#include <QtNetwork/QTcpSocket>
+#include <QTimer>
 #include "layoutdata.h"
 #include "path.h"
 #include "state.h"
@@ -44,7 +46,18 @@ public:
     int load_config(QString fname);
     void drawMesh();
     int get_int_value_from_data(QString var);
+    QString get_stri_value_from_data(QString var);
+    int connect_to_server();
+
     ~MainWindow();
+
+
+private slots:
+    void check_connection();
+    void layoutDataChanged(); // user did some action on layout (pressed button, etc..)
+    void readData();
+    void disconnectFromServer();
+
 protected:
     // parser functions
     bool parse_list(QStringList& list, LayoutData* ld);
@@ -109,6 +122,8 @@ private:
     bool multiline_comment_on;
     bool is_updating;
     QPoint last_pos;
+    QTcpSocket* socket;
+    QTimer *timer;
 
 };
 
