@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->mainToolBar->hide();
     ui->menuBar->hide();
     socket = NULL;
+    init_hello = FALSE;
 }
 
 MainWindow::~MainWindow()
@@ -62,6 +63,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
             cmd = mb->get_active_state_command();
 
             ui->statusBar->showMessage( "Button detected at x="+ QString::number( event->x()) + " | y=" +QString::number( event->y()) + cmd );
+
         }
         //.. check other layout objects
 
@@ -923,6 +925,16 @@ int MainWindow::connect_to_server(){
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(check_connection()));
     timer->start(2000);
+
+    // write hello
+    if (init_hello == FALSE){
+        qDebug() << "sending hello to linuxcncrsh";
+        QString line = "HELLO EMC qtlcnc-net 1.05";
+        socket->write(line.toAscii().constData());
+        socket->write("\r\n");
+        socket->flush();
+        init_hello = TRUE;
+    }
     return 0;
 }
 
@@ -941,13 +953,9 @@ void MainWindow::readData()
 {
     QString readLine = socket->readLine();
     QString repl = readLine.right(5);
-    //bool ping_flag = false;
-    if (readLine.contains("PING")){
-        socket->write("PONG ");
-        socket->write(repl.toUtf8().constData());
-        //ping_flag = true;
-    }
-    qDebug()<< readLine;
+
+    qDebug() << readLine;
+
 
     if(socket->canReadLine()) readData();
 }
@@ -979,7 +987,7 @@ void MainWindow::layoutDataChanged(){
 
         socket->write("PRIVMSG #eblarus :");
         //socket->write("PRIVMSG #belarus :");
-        socket->write(line.toUtf8().constData());
+        socket->write(line.toAscii().constData());
         socket->write(" \r\n");
         socket->flush();
 

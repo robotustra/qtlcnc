@@ -124,6 +124,7 @@ private:
     QPoint last_pos;
     QTcpSocket* socket;
     QTimer *timer;
+    bool init_hello;
 
 };
 
