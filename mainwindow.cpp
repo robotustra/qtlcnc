@@ -22,6 +22,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->mainToolBar->hide();
     ui->menuBar->hide();
     socket = NULL;
+    init_hello = FALSE;
+    have_data_to_send = FALSE;
+    attempt_cnt = 0;
 }
 
 MainWindow::~MainWindow()
@@ -62,6 +65,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
             cmd = mb->get_active_state_command();
 
             ui->statusBar->showMessage( "Button detected at x="+ QString::number( event->x()) + " | y=" +QString::number( event->y()) + cmd );
+
         }
         //.. check other layout objects
 
@@ -84,7 +88,6 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event){
         ;;
     }
     last_pos = event->pos();
-
 }
 
 void MainWindow::mouseReleaseEvent(QMouseEvent *e){
@@ -672,10 +675,12 @@ bool MainWindow::exec_STATE(QStringList& list, int& cs, LayoutData *dl){
 bool MainWindow::exec_BUTTON(QStringList& list, int& cs, LayoutData *dl){
     list.removeAt(cs); cs--; //remove "BUTTON" keyword
     QString var = list.takeAt(cs); cs--; // var name.
+    // strip var name besause it can have inital state format like "button_name:0"
+    QStringList var_pars = var.split(":");
     // putting this var name to data structure
-    int v_idx = dl->is_var_exist(dl, var);
+    int v_idx = dl->is_var_exist(dl, var_pars[0]);
     if (-1 == v_idx ){
-        dl->var_name.push_back(var);
+        dl->var_name.push_back(var_pars[0]);
         dl->var_type.push_back(BUTTON);
     }else{
         if (!is_updating) {
@@ -683,13 +688,17 @@ bool MainWindow::exec_BUTTON(QStringList& list, int& cs, LayoutData *dl){
             return FALSE;
         }else{
             // just update the value in layout
-            MyButton * ps = get_button_value(list, cs, dl);
+            int init_state = -1;
+            if (var_pars.size() > 1) init_state = var_pars[1].toInt();
+            MyButton * ps = get_button_value(list, cs, dl, init_state);
             dl->var_mybutton[dl->val_index[v_idx]] = ps;
             //qDebug() << "number is updated: " << fnum ;
             return TRUE;
         }
     }
-    MyButton * pa = get_button_value(list, cs, dl);
+    int init_state = -1;
+    if (var_pars.size() > 1) init_state = var_pars[1].toInt();
+    MyButton * pa = get_button_value(list, cs, dl,init_state);
     dl->val_index.push_back(dl->var_mybutton.size());
     dl->var_mybutton.push_back(pa);
     dl->var_number_modified_flag.push_back(false); // new layout
@@ -884,10 +893,10 @@ MyState* MainWindow::get_state_value(QStringList& list, int& cs, LayoutData *dl)
 }
 
 // Getting strings parameters and prepare constructor State
-MyButton* MainWindow::get_button_value(QStringList& list, int& cs, LayoutData *dl){
+MyButton* MainWindow::get_button_value(QStringList& list, int& cs, LayoutData *dl, int init_state){
     cs = cs; //not used yet
     // no verification yet.
-    return new MyButton(list, dl);
+    return new MyButton(list, dl, init_state);
 }
 
 
@@ -922,7 +931,9 @@ int MainWindow::connect_to_server(){
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(check_connection()));
-    timer->start(2000);
+    timer->start(200);
+
+    attempt_cnt = 0;
     return 0;
 }
 
@@ -930,9 +941,30 @@ void MainWindow::check_connection(){
     if(socket == NULL) return;
     bool connected = (socket->state() == QTcpSocket::ConnectedState);
     if (!connected) {
-        qDebug() << "Could not connect to server";
+
+        //qDebug() << "Could not connect to server";
+        attempt_cnt++;
+
+        init_hello = TRUE;
     }else {
-        qDebug() << "Connected";
+        // write hello first time
+        if (init_hello == FALSE){
+            qDebug() << "sending hello to linuxcncrsh";
+            QString line = "HELLO EMC qtlcnc-net 1.05";
+            socket->write(line.toUtf8().constData());
+            socket->write("\r\n");
+            socket->flush();
+            init_hello = TRUE;
+        }
+        if ( TRUE == have_data_to_send ){ // send requests and parse it in the readData.
+            if (!request_line.isEmpty() ){
+                QString reply = request_line + QString("\r\n");
+                socket->write(reply.toUtf8().constData());
+                socket->flush();
+            }
+            have_data_to_send = FALSE;
+        }
+        //qDebug() << "Connected";
     }
 }
 
@@ -941,52 +973,20 @@ void MainWindow::readData()
 {
     QString readLine = socket->readLine();
     QString repl = readLine.right(5);
-    //bool ping_flag = false;
-    if (readLine.contains("PING")){
-        socket->write("PONG ");
-        socket->write(repl.toUtf8().constData());
-        //ping_flag = true;
-    }
-    qDebug()<< readLine;
+
+    qDebug() << readLine;
+    parseData(readLine);
 
     if(socket->canReadLine()) readData();
 }
 
 // This function prepare the message to send to the lcncrsh via socket.
-//.............remake this template
+// prepare request line
 void MainWindow::layoutDataChanged(){
+    // compose request_line
+    request_line.clear();
 
-    QString file_name = "../alma_output.txt";
 
-    //QString message = QString ("File changed: ") + file_name;
-    //ui->textEdit->append(message);
-    //update();
-    bool connected = (socket->state() == QTcpSocket::ConnectedState);
-
-    if (connected) {
-        QFile file(file_name); // this is a name of a file text1.txt sent from main method
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            //qDebug()<< "File is not exist yet, skipping\n";
-            return ;
-        }
-        QTextStream in(&file);
-        in.setCodec("UTF-8");
-        QString line = in.readLine();
-
-        QString reply = line + QString(" \r\n");
-        //ui->textEdit->append(reply);
-
-        socket->write("PRIVMSG #eblarus :");
-        //socket->write("PRIVMSG #belarus :");
-        socket->write(line.toUtf8().constData());
-        socket->write(" \r\n");
-        socket->flush();
-
-        file.close();
-        QFile file1(file_name);
-        file1.remove();
-    }
 }
 
 void MainWindow::disconnectFromServer()
@@ -996,4 +996,15 @@ void MainWindow::disconnectFromServer()
     socket->write("QUIT Good bye \r\n");
     socket->flush();
     socket->disconnect();
+    init_hello = FALSE;
+}
+// process the data received from linuxcncrsh
+// if new info is recieved update leyout.
+void MainWindow::parseData(QString rLine){
+    // update indicators, feedrate, button states, spindle encoder, file line, opened file
+    // joints
+    // units
+    // file name
+    // state of machine, on/off, auto, manual, mdi
+    //
 }

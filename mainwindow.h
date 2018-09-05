@@ -48,6 +48,7 @@ public:
     int get_int_value_from_data(QString var);
     QString get_stri_value_from_data(QString var);
     int connect_to_server();
+    void parseData(QString rLine);
 
     ~MainWindow();
 
@@ -80,7 +81,7 @@ protected:
     QString get_next_quoted_token(QString& str);
     Path2D * get_path_value(QStringList& list, int& cs, LayoutData *dl);
     MyState * get_state_value(QStringList& list, int& cs, LayoutData *dl);
-    MyButton* get_button_value(QStringList& list, int& cs, LayoutData *dl);
+    MyButton* get_button_value(QStringList& list, int& cs, LayoutData *dl, int init_state);
     SimpleLayout* get_slayout_value(QStringList& list, int& cs, LayoutData *dl);
 
     bool exec_IVAR(QStringList& list, int& cs, LayoutData *dl);
@@ -124,6 +125,10 @@ private:
     QPoint last_pos;
     QTcpSocket* socket;
     QTimer *timer;
+    bool init_hello;
+    bool have_data_to_send;
+    int attempt_cnt;
+    QString request_line;
 
 };
 

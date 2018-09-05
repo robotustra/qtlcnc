@@ -62,8 +62,16 @@ void LayoutData::draw_layout(QPainter &painter, QPoint& loffset){
     }
     //qDebug()<< "layout elments to display: " << sl->elements ;
     for (int i=0; i < sl->elements.size(); i++){
+        // extract init state of element
+        QString el_name = sl->elements[i];
+        QStringList complex_element;
+        complex_element = el_name.split(":"); // try to select the init state
         int t;
-        MyLayoutObject * lo = get_layout_object_by_name(sl->elements[i], &t);
+        MyLayoutObject * lo = get_layout_object_by_name(complex_element[0], &t);
+        int init_state = -1;
+        if (complex_element.size()>1) {
+            init_state = complex_element[1].toInt();
+        }
         if (t == BUTTON){
             MyButton * mb = (MyButton*) lo;
             mb->drawLayoutObject(painter, loffset);
@@ -92,8 +100,11 @@ MyLayoutObject * LayoutData::get_layout_object_at_mouse_pos(QPoint pos, int * ty
     }
     //qDebug()<< "layout elments to display: " << sl->elements ;
     for (int i=0; i < sl->elements.size(); i++){
+        QString el_name = sl->elements[i];
+        QStringList complex_element;
+        complex_element = el_name.split(":"); // try to select the init state
         int t;
-        MyLayoutObject * lo = get_layout_object_by_name(sl->elements[i], &t);
+        MyLayoutObject * lo = get_layout_object_by_name(complex_element[0], &t);
         if (t == BUTTON){
             //qDebug() << "button found " << sl->elements[i];
             MyButton * mb = (MyButton*) lo;
@@ -125,6 +136,10 @@ MyLayoutObject* LayoutData::get_layout_object_by_name(QString& obj_name, int * t
     int t = var_type[idx];
     *type = t;
     switch (t) {
+    case LAYOUT:
+        l_obj = var_slayout[val_index[idx]];
+        //qDebug() << "have simple layout: idx =" << val_index[idx] << "name = " << var_name[idx] << "addres =" << l_obj;
+        break;
     case BUTTON:
         l_obj = var_mybutton[val_index[idx]];
         //qDebug() << "have button: idx =" << val_index[idx] << "name = " << var_name[idx] << "addres =" << l_obj;
@@ -263,7 +278,15 @@ void LayoutData::processCommand(QString & cmd){
                 if ( !(mb->setState(new_state)) ){
                     qDebug() << "cannot change batton state" ;
                 }
-
+            }
+            if (t == LAYOUT){
+                SimpleLayout * sl = (SimpleLayout*) lo;
+                int new_state = obj_param.toInt();
+                if (sl!=NULL){
+                    if ( !(sl->select_layout((new_state)?TRUE:FALSE) ) ){
+                        qDebug() << "cannot change layout state" ;
+                    }
+                }
             }
         }
 
