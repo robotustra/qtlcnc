@@ -48,6 +48,7 @@ public:
     int get_int_value_from_data(QString var);
     QString get_stri_value_from_data(QString var);
     int connect_to_server();
+    void parseData(QString rLine);
 
     ~MainWindow();
 
@@ -125,6 +126,9 @@ private:
     QTcpSocket* socket;
     QTimer *timer;
     bool init_hello;
+    bool have_data_to_send;
+    int attempt_cnt;
+    QString request_line;
 
 };
 

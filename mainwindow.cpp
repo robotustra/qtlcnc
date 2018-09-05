@@ -23,6 +23,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->menuBar->hide();
     socket = NULL;
     init_hello = FALSE;
+    have_data_to_send = FALSE;
+    attempt_cnt = 0;
 }
 
 MainWindow::~MainWindow()
@@ -86,7 +88,6 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event){
         ;;
     }
     last_pos = event->pos();
-
 }
 
 void MainWindow::mouseReleaseEvent(QMouseEvent *e){
@@ -924,17 +925,9 @@ int MainWindow::connect_to_server(){
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(check_connection()));
-    timer->start(2000);
+    timer->start(200);
 
-    // write hello
-    if (init_hello == FALSE){
-        qDebug() << "sending hello to linuxcncrsh";
-        QString line = "HELLO EMC qtlcnc-net 1.05";
-        socket->write(line.toAscii().constData());
-        socket->write("\r\n");
-        socket->flush();
-        init_hello = TRUE;
-    }
+    attempt_cnt = 0;
     return 0;
 }
 
@@ -942,9 +935,30 @@ void MainWindow::check_connection(){
     if(socket == NULL) return;
     bool connected = (socket->state() == QTcpSocket::ConnectedState);
     if (!connected) {
-        qDebug() << "Could not connect to server";
+
+        //qDebug() << "Could not connect to server";
+        attempt_cnt++;
+
+        init_hello = TRUE;
     }else {
-        qDebug() << "Connected";
+        // write hello first time
+        if (init_hello == FALSE){
+            qDebug() << "sending hello to linuxcncrsh";
+            QString line = "HELLO EMC qtlcnc-net 1.05";
+            socket->write(line.toUtf8().constData());
+            socket->write("\r\n");
+            socket->flush();
+            init_hello = TRUE;
+        }
+        if ( TRUE == have_data_to_send ){ // send requests and parse it in the readData.
+            if (!request_line.isEmpty() ){
+                QString reply = request_line + QString("\r\n");
+                socket->write(reply.toUtf8().constData());
+                socket->flush();
+            }
+            have_data_to_send = FALSE;
+        }
+        //qDebug() << "Connected";
     }
 }
 
@@ -955,46 +969,18 @@ void MainWindow::readData()
     QString repl = readLine.right(5);
 
     qDebug() << readLine;
-
+    parseData(readLine);
 
     if(socket->canReadLine()) readData();
 }
 
 // This function prepare the message to send to the lcncrsh via socket.
-//.............remake this template
+// prepare request line
 void MainWindow::layoutDataChanged(){
+    // compose request_line
+    request_line.clear();
 
-    QString file_name = "../alma_output.txt";
 
-    //QString message = QString ("File changed: ") + file_name;
-    //ui->textEdit->append(message);
-    //update();
-    bool connected = (socket->state() == QTcpSocket::ConnectedState);
-
-    if (connected) {
-        QFile file(file_name); // this is a name of a file text1.txt sent from main method
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            //qDebug()<< "File is not exist yet, skipping\n";
-            return ;
-        }
-        QTextStream in(&file);
-        in.setCodec("UTF-8");
-        QString line = in.readLine();
-
-        QString reply = line + QString(" \r\n");
-        //ui->textEdit->append(reply);
-
-        socket->write("PRIVMSG #eblarus :");
-        //socket->write("PRIVMSG #belarus :");
-        socket->write(line.toAscii().constData());
-        socket->write(" \r\n");
-        socket->flush();
-
-        file.close();
-        QFile file1(file_name);
-        file1.remove();
-    }
 }
 
 void MainWindow::disconnectFromServer()
@@ -1004,4 +990,15 @@ void MainWindow::disconnectFromServer()
     socket->write("QUIT Good bye \r\n");
     socket->flush();
     socket->disconnect();
+    init_hello = FALSE;
+}
+// process the data received from linuxcncrsh
+// if new info is recieved update leyout.
+void MainWindow::parseData(QString rLine){
+    // update indicators, feedrate, button states, spindle encoder, file line, opened file
+    // joints
+    // units
+    // file name
+    // state of machine, on/off, auto, manual, mdi
+    //
 }
