@@ -1,6 +1,6 @@
 #include "mybutton.h"
 
-MyButton::MyButton(QStringList & sl, LayoutData* ld)
+MyButton::MyButton(QStringList & sl, LayoutData* ld, int init_state=-1)
 {
     elements = sl;
     ld_local = ld;
@@ -8,6 +8,7 @@ MyButton::MyButton(QStringList & sl, LayoutData* ld)
     // setup default state
     current_state = -1;
     if (elements.size() > 0) current_state = 0;
+    if ( (init_state < elements.size()) && (init_state >= 0)) current_state = init_state;
 
 }
 

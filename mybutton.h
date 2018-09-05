@@ -9,7 +9,7 @@ class MyState;
 class MyButton: public MyLayoutObject
 {
 public:
-    MyButton(QStringList & sl, LayoutData *ld);
+    MyButton(QStringList & sl, LayoutData *ld, int init_state);
     void drawLayoutObject(QPainter& p, QPoint &loffset);
     void selectLayoutObject();
     void setLayoutObjectStatus();

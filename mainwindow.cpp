@@ -675,10 +675,12 @@ bool MainWindow::exec_STATE(QStringList& list, int& cs, LayoutData *dl){
 bool MainWindow::exec_BUTTON(QStringList& list, int& cs, LayoutData *dl){
     list.removeAt(cs); cs--; //remove "BUTTON" keyword
     QString var = list.takeAt(cs); cs--; // var name.
+    // strip var name besause it can have inital state format like "button_name:0"
+    QStringList var_pars = var.split(":");
     // putting this var name to data structure
-    int v_idx = dl->is_var_exist(dl, var);
+    int v_idx = dl->is_var_exist(dl, var_pars[0]);
     if (-1 == v_idx ){
-        dl->var_name.push_back(var);
+        dl->var_name.push_back(var_pars[0]);
         dl->var_type.push_back(BUTTON);
     }else{
         if (!is_updating) {
@@ -686,13 +688,17 @@ bool MainWindow::exec_BUTTON(QStringList& list, int& cs, LayoutData *dl){
             return FALSE;
         }else{
             // just update the value in layout
-            MyButton * ps = get_button_value(list, cs, dl);
+            int init_state = -1;
+            if (var_pars.size() > 1) init_state = var_pars[1].toInt();
+            MyButton * ps = get_button_value(list, cs, dl, init_state);
             dl->var_mybutton[dl->val_index[v_idx]] = ps;
             //qDebug() << "number is updated: " << fnum ;
             return TRUE;
         }
     }
-    MyButton * pa = get_button_value(list, cs, dl);
+    int init_state = -1;
+    if (var_pars.size() > 1) init_state = var_pars[1].toInt();
+    MyButton * pa = get_button_value(list, cs, dl,init_state);
     dl->val_index.push_back(dl->var_mybutton.size());
     dl->var_mybutton.push_back(pa);
     dl->var_number_modified_flag.push_back(false); // new layout
@@ -887,10 +893,10 @@ MyState* MainWindow::get_state_value(QStringList& list, int& cs, LayoutData *dl)
 }
 
 // Getting strings parameters and prepare constructor State
-MyButton* MainWindow::get_button_value(QStringList& list, int& cs, LayoutData *dl){
+MyButton* MainWindow::get_button_value(QStringList& list, int& cs, LayoutData *dl, int init_state){
     cs = cs; //not used yet
     // no verification yet.
-    return new MyButton(list, dl);
+    return new MyButton(list, dl, init_state);
 }
 
 
