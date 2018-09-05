@@ -2,8 +2,9 @@
 #define SIMPLELAYOUT_H
 #include <QString>
 #include <QStringList>
+#include "layoutobject.h"
 
-class SimpleLayout
+class SimpleLayout : public MyLayoutObject
 {
 public:
     SimpleLayout(QStringList & sl);

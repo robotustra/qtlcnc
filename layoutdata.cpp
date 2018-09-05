@@ -136,6 +136,10 @@ MyLayoutObject* LayoutData::get_layout_object_by_name(QString& obj_name, int * t
     int t = var_type[idx];
     *type = t;
     switch (t) {
+    case LAYOUT:
+        l_obj = var_slayout[val_index[idx]];
+        //qDebug() << "have simple layout: idx =" << val_index[idx] << "name = " << var_name[idx] << "addres =" << l_obj;
+        break;
     case BUTTON:
         l_obj = var_mybutton[val_index[idx]];
         //qDebug() << "have button: idx =" << val_index[idx] << "name = " << var_name[idx] << "addres =" << l_obj;
@@ -274,7 +278,15 @@ void LayoutData::processCommand(QString & cmd){
                 if ( !(mb->setState(new_state)) ){
                     qDebug() << "cannot change batton state" ;
                 }
-
+            }
+            if (t == LAYOUT){
+                SimpleLayout * sl = (SimpleLayout*) lo;
+                int new_state = obj_param.toInt();
+                if (sl!=NULL){
+                    if ( !(sl->select_layout((new_state)?TRUE:FALSE) ) ){
+                        qDebug() << "cannot change layout state" ;
+                    }
+                }
             }
         }
 
