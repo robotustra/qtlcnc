@@ -24,6 +24,10 @@ public:
 
 private:
     QString  g_code_file;
+    QStringList elements;   // this list contains the states button can have.
+    int current_state;      // if the more than one state possible this index keep it.
+    LayoutData * ld_local;  // save the pointer to the data while initializing;
+
 
 };
 
