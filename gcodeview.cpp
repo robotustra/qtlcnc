@@ -58,6 +58,8 @@ void GCodeView::drawLayoutObject(QPainter& painter, QPoint &loffset){
         //draw list on top of this
         if (g_list != NULL){
             g_list->setGeometry( (pt->x()-1)*ucell+loffset.x(),  (pt->y()-1)*ucell + loffset.y(), sz->x()*ucell,sz->y()*ucell );
+            QFont gc_font("Monospace",20); // make font autoload to state
+            g_list->setFont(gc_font);
             g_list->setVisible(TRUE);
         }
     }
