@@ -353,6 +353,7 @@ std::string key_words[] = {
         "PATH",
         "STATE",
         "BUTTON",
+        "GCODEVIEW",
         "LAYOUT"
 
     };
@@ -565,6 +566,10 @@ bool MainWindow::exec_word(QStringList& list, int& cs, LayoutData *ld){
         qDebug() << "BUTTON found";
         ok = exec_BUTTON(list, cs, ld);
     }
+    if(QString::compare( ts, "GCODEVIEW", Qt::CaseInsensitive) == 0){ // button object
+        qDebug() << "GCODEVIEW found";
+        ok = exec_GCODEVIEW(list, cs, ld);
+    }
     if(QString::compare( ts, "LAYOUT", Qt::CaseInsensitive) == 0){ // layout object
         qDebug() << "LAYOUT found";
         ok = exec_LAYOUT(list, cs, ld);
@@ -705,6 +710,39 @@ bool MainWindow::exec_BUTTON(QStringList& list, int& cs, LayoutData *dl){
     //qDebug() << "state is loaded :" << fnum ;
     return TRUE;
 }
+
+bool MainWindow::exec_GCODEVIEW(QStringList& list, int& cs, LayoutData *dl){
+    list.removeAt(cs); cs--; //remove "GCODEVIEW" keyword
+    QString var = list.takeAt(cs); cs--; // var name.
+    // strip var name besause it can have inital state format like "button_name:0"
+    QStringList var_pars = var.split(":");
+    // putting this var name to data structure
+    int v_idx = dl->is_var_exist(dl, var_pars[0]);
+    if (-1 == v_idx ){
+        dl->var_name.push_back(var_pars[0]);
+        dl->var_type.push_back(GCODEVIEW);
+    }else{
+        if (!is_updating) {
+            qDebug() << "gcodeview " << var << " exists, fix input file.";
+            return FALSE;
+        }else{
+            // just update the value in layout
+            int init_state = -1;
+            if (var_pars.size() > 1) init_state = var_pars[1].toInt();
+            GCodeView * ps = get_gcodeview_value(list, cs, dl, init_state);
+            dl->var_gcodeview[dl->val_index[v_idx]] = ps;
+            return TRUE;
+        }
+    }
+    int init_state = -1;
+    if (var_pars.size() > 1) init_state = var_pars[1].toInt();
+    GCodeView * pa = get_gcodeview_value(list, cs, dl,init_state);
+    dl->val_index.push_back(dl->var_gcodeview.size());
+    dl->var_gcodeview.push_back(pa);
+    dl->var_number_modified_flag.push_back(false); // new layout
+    return TRUE;
+}
+
 
 
 bool MainWindow::exec_LAYOUT(QStringList& list, int& cs, LayoutData *dl){
@@ -899,6 +937,12 @@ MyButton* MainWindow::get_button_value(QStringList& list, int& cs, LayoutData *d
     return new MyButton(list, dl, init_state);
 }
 
+// Getting strings parameters and prepare constructor State
+GCodeView* MainWindow::get_gcodeview_value(QStringList& list, int& cs, LayoutData *dl, int init_state){
+    cs = cs; //not used yet
+    // no verification yet.
+    return new GCodeView(this, list, dl, init_state);
+}
 
 // Getting strings parameters and prepare constructor State
 SimpleLayout* MainWindow::get_slayout_value(QStringList& list, int& cs, LayoutData *dl){
