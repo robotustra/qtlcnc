@@ -16,6 +16,7 @@
 #include "state.h"
 #include "simplelayout.h"
 #include "mybutton.h"
+#include "gcodeview.h"
 
 #ifndef TRUE
 #define TRUE true
@@ -82,6 +83,7 @@ protected:
     Path2D * get_path_value(QStringList& list, int& cs, LayoutData *dl);
     MyState * get_state_value(QStringList& list, int& cs, LayoutData *dl);
     MyButton* get_button_value(QStringList& list, int& cs, LayoutData *dl, int init_state);
+    GCodeView* get_gcodeview_value(QStringList& list, int& cs, LayoutData *dl, int init_state);
     SimpleLayout* get_slayout_value(QStringList& list, int& cs, LayoutData *dl);
 
     bool exec_IVAR(QStringList& list, int& cs, LayoutData *dl);
@@ -90,6 +92,7 @@ protected:
     bool exec_STRI(QStringList& list, int& cs, LayoutData *dl);
     bool exec_STATE(QStringList& list, int& cs, LayoutData *dl);
     bool exec_BUTTON(QStringList& list, int& cs, LayoutData *dl);
+    bool exec_GCODEVIEW(QStringList& list, int& cs, LayoutData *dl);
     bool exec_LAYOUT(QStringList& list, int& cs, LayoutData *dl);
 
 

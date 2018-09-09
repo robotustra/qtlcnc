@@ -76,6 +76,10 @@ void LayoutData::draw_layout(QPainter &painter, QPoint& loffset){
             MyButton * mb = (MyButton*) lo;
             mb->drawLayoutObject(painter, loffset);
         }
+        if (t == GCODEVIEW){
+            GCodeView * cv = (GCodeView*) lo;
+            cv->drawLayoutObject(painter, loffset);
+        }
     }
 
 }
@@ -109,6 +113,15 @@ MyLayoutObject * LayoutData::get_layout_object_at_mouse_pos(QPoint pos, int * ty
             //qDebug() << "button found " << sl->elements[i];
             MyButton * mb = (MyButton*) lo;
             if (mb->isCursorOver(pos)) {
+                mlo = lo;
+                *type = t;
+                break;
+            }
+        }
+        if (t == GCODEVIEW){
+            //qDebug() << "gcode view found " << sl->elements[i];
+            GCodeView * cv = (GCodeView*) lo;
+            if (cv->isCursorOver(pos)) {
                 mlo = lo;
                 *type = t;
                 break;
@@ -277,6 +290,13 @@ void LayoutData::processCommand(QString & cmd){
                 int new_state = obj_param.toInt();
                 if ( !(mb->setState(new_state)) ){
                     qDebug() << "cannot change batton state" ;
+                }
+            }
+            if (t == GCODEVIEW){
+                GCodeView * cv = (GCodeView*) lo;
+                int new_state = obj_param.toInt();
+                if ( !(cv->setState(new_state)) ){
+                    qDebug() << "cannot change view state" ;
                 }
             }
             if (t == LAYOUT){

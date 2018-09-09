@@ -1,9 +1,12 @@
 #include "gcodeview.h"
+#include "state.h"
+#include <QPoint>
+#include <QDebug>
 
-GCodeView::GCodeView(QStringList &sl, LayoutData *ld, int init_state)
+GCodeView::GCodeView(QMainWindow* p, QStringList &sl, LayoutData *ld, int init_state)
 {
-    //...........to continue...
-    /*
+    parent = p;
+    g_list = new QListWidget(p);
     elements = sl;
     ld_local = ld;
     // parse all data and fill the structures for button to speed up drawing afterwards
@@ -11,46 +14,86 @@ GCodeView::GCodeView(QStringList &sl, LayoutData *ld, int init_state)
     current_state = -1;
     if (elements.size() > 0) current_state = 0;
     if ( (init_state < elements.size()) && (init_state >= 0)) current_state = init_state;
-    */
+
+    g_list->addItem(QString("line 1"));
+
 }
 
-void GCodeView::drawLayoutObject(QPainter& p, QPoint &loffset){
-    /*
-    // get actual data from the structure and do actual drawing of the button
-        // 1) get current state
-        if (current_state < 0 ){
-            qDebug() << "button has no states, fix ini file";
-            return;
+GCodeView::~GCodeView(){
+    if (g_list != NULL) delete g_list;
+}
+
+void GCodeView::drawLayoutObject(QPainter& painter, QPoint &loffset){
+    // get actual data from the structure and do actual drawing of the gcode viewer
+    // 1) get current state
+    if (current_state < 0 ){
+        qDebug() << "g code view has no states, fix ini file";
+        return;
+    }
+    // check if the element should appear on layout
+    if (this->is_visible() && ld_local != NULL){
+        //get the state configuration
+        MyState* cs = ld_local->get_state_object_by_name( elements [current_state] );
+        //qDebug() << "got state " <<  elements [current_state] ;
+        QPoint * pt = cs->get_Position(ld_local);
+        //qDebug() << "pt x= " << pt->x() << "pt y = " << pt->y();
+        QPoint * sz = cs->get_Size(ld_local);
+        //qDebug() << "size x= " << sz->x() << "size y = " << sz->y();
+        // get the unit size
+        QString us = QString("ucell");
+        int ucell = ld_local->get_int_value_by_name(us);
+        //qDebug() << "ucell= " << ucell;
+        /*
+        //loop over all pathes
+        int path_num = cs->get_paths_number();
+        for (int i=0; i<path_num; i++) {
+            QString bgcolor = cs->get_bgColor(ld_local, i);
+            //qDebug() << "bgcol = " << bgcolor;
+            QString pencolor = cs->get_pColor(ld_local, i);
+            //qDebug() << "pcol = " << pencolor;
+            // get PIX
+            Path2D * pix = cs->get_Pix(ld_local, i);
+            pix->drawPath(painter, pencolor, bgcolor, pt, sz, ucell, loffset );
+        }*/
+        //draw list on top of this
+        if (g_list != NULL){
+            g_list->setGeometry( (pt->x()-1)*ucell+loffset.x(),  (pt->y()-1)*ucell + loffset.y(), sz->x()*ucell,sz->y()*ucell );
+            QFont gc_font("Monospace",20); // make font autoload to state
+            g_list->setFont(gc_font);
+            g_list->setVisible(TRUE);
         }
-        // check if the element should appear on layout
-        if (this->is_visible() && ld_local != NULL){
-            //get the state configuration
-            MyState* cs = ld_local->get_state_object_by_name( elements [current_state] );
-            //qDebug() << "got state " <<  elements [current_state] ;
-            QPoint * pt = cs->get_Position(ld_local);
-            //qDebug() << "pt x= " << pt->x() << "pt y = " << pt->y();
-            QPoint * sz = cs->get_Size(ld_local);
-            //qDebug() << "size x= " << sz->x() << "size y = " << sz->y();
-            // get the unit size
-            QString us = QString("ucell");
-            int ucell = ld_local->get_int_value_by_name(us);
-            //qDebug() << "ucell= " << ucell;
+    }
+}
 
-            //loop over all pathes
-            int path_num = cs->get_paths_number();
-            for (int i=0; i<path_num; i++) {
-                QString bgcolor = cs->get_bgColor(ld_local, i);
-                //qDebug() << "bgcol = " << bgcolor;
-                QString pencolor = cs->get_pColor(ld_local, i);
-                //qDebug() << "pcol = " << pencolor;
+bool GCodeView::isCursorOver(QPoint& pos){
+    if (current_state < 0 ){
+        qDebug() << "gcodeview has no states, fix ini file";
+        return false;
+    }
+    if (this->is_visible() && ld_local != NULL){
+        //qDebug() << "gcodeview is visible";
+        //get the state configuration
+        MyState* cs = ld_local->get_state_object_by_name( elements [current_state] );
+        //qDebug() << "button state =" << cs;
+        QPoint * pt = cs->get_Position(ld_local);
+        //qDebug() << "pt x= " << pt->x() << "pt y = " << pt->y();
+        QPoint * sz = cs->get_Size(ld_local);
+        //qDebug() << "size x= " << sz->x() << "size y = " << sz->y();
+        QString ustr = QString("ucell");
+        int ucell = ld_local->get_int_value_by_name(ustr);
+        if ( (pos.x() >= (pt->x()-1)*ucell) && (pos.x() < (pt->x()+sz->x()-1) *ucell) &&
+             (pos.y() >= (pt->y()-1)*ucell) && (pos.y() < (pt->y()+sz->y()-1) *ucell) )
+            return true;
+    }
+    return false;
+}
 
-                // get PIX
-                Path2D * pix = cs->get_Pix(ld_local, i);
-
-                pix->drawPath(painter, pencolor, bgcolor, pt, sz, ucell, loffset );
-            }
-        }
-    */
+bool GCodeView::setState(int state){
+    if ( (state >= 0) && (state < elements.size())) {
+        current_state = state;
+        return true;
+    }
+    return false;
 }
 
 // to define later
