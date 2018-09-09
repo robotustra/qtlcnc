@@ -270,9 +270,34 @@ void LayoutData::processCommand(QString & cmd){
         Command consisnt of name of variables in the layout data and can modify it.
         For button the number means the state.
         "button:1" means that the button state will be switched to state 1.
+        Command also can have different elements like
+        lcnc:
+        openfile:
+        which has own syntax or specific commands like
+        lcnc:"set estop off" etc.
+
 
     */
+    // extracting special commands
+    int n = cmd.indexOf("lcnc:",0);
+    if (n >= 0){
+        //extracting substing form command
+        int quote_start = cmd.indexOf("\"", n);
+        int quote_end = cmd.indexOf("\"", quote_start+1);
+
+        QString lcnc_cmd = cmd.mid(quote_start, quote_end - quote_start+1);
+        qDebug() << "lcnc command: [" << lcnc_cmd << "]";
+        cmd.remove("lcnc:");
+        cmd.remove(lcnc_cmd);
+        lcnc_cmd.remove(0,1);
+        lcnc_cmd.remove(lcnc_cmd.size()-1,1);
+        //save command to lcnc variable
+        set_string_value_by_name(QString("lcnc"), lcnc_cmd);
+
+    }
+
     QStringList cmd_list = cmd.split(" ");
+
     for (int i=0; i < cmd_list.size(); i++){
         // select the name of object
         QString tmp = cmd_list[i];
@@ -312,4 +337,17 @@ void LayoutData::processCommand(QString & cmd){
 
     }
 
+}
+
+void LayoutData::set_string_value_by_name(QString str_name, QString& value){
+    int v_idx = is_var_exist(this, str_name);
+    if (-1 != v_idx && (var_type[v_idx] == STRI)){
+        var_string[val_index[v_idx]] = value;
+        qDebug()<< str_name << " = " << value;
+
+    }else{
+       qDebug()<< "variable name do not exist:" << str_name;
+       exit (-1);
+    }
+    return;
 }

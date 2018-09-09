@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->menuBar->hide();
     socket = NULL;
     init_hello = FALSE;
+    init_enable = FALSE;
     have_data_to_send = FALSE;
     attempt_cnt = 0;
 }
@@ -68,7 +69,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
 
         }
         //.. check other layout objects
-
+        have_data_to_send = TRUE;
     }else {
         ui->statusBar->showMessage( "x="+ QString::number( event->x()) + " | y=" +QString::number( event->y()) );
     }
@@ -975,7 +976,8 @@ int MainWindow::connect_to_server(){
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(check_connection()));
-    timer->start(200);
+    //timer->start(1000);
+    timer->start(500);
 
     attempt_cnt = 0;
     return 0;
@@ -999,14 +1001,35 @@ void MainWindow::check_connection(){
             socket->write("\r\n");
             socket->flush();
             init_hello = TRUE;
-        }
+        }else
+        if (init_hello == TRUE && init_enable == FALSE){
+            qDebug() << "sending enable to linuxcncrsh";
+            QString line = "set enable EMCTOO";
+            socket->write(line.toUtf8().constData());
+            socket->write("\r\n");
+            socket->flush();
+            init_enable = TRUE;
+            timer->stop();
+            timer->start(200);
+        }else
         if ( TRUE == have_data_to_send ){ // send requests and parse it in the readData.
+            QString lcnc = "lcnc";
+            QString empty = QString("");
+            request_line = ld->get_string_value_by_name(lcnc);
+            ld->set_string_value_by_name(lcnc, empty);
             if (!request_line.isEmpty() ){
                 QString reply = request_line + QString("\r\n");
                 socket->write(reply.toUtf8().constData());
                 socket->flush();
             }
             have_data_to_send = FALSE;
+        } else {
+            // update information about position of spindle.
+            qDebug() << "getting ";
+            QString line = "get joint_pos";
+            socket->write(line.toUtf8().constData());
+            socket->write("\r\n");
+            socket->flush();
         }
         //qDebug() << "Connected";
     }
@@ -1050,5 +1073,9 @@ void MainWindow::parseData(QString rLine){
     // units
     // file name
     // state of machine, on/off, auto, manual, mdi
-    //
+
+    if ( rLine.contains(QString("JOINT_POS")) ){
+        QStringList pos = rLine.split(" ");
+        qDebug() << "x0=" << pos[1] << " y0=" << pos[2] << " z0=" << pos[3];
+    }
 }
