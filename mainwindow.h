@@ -129,6 +129,7 @@ private:
     QTcpSocket* socket;
     QTimer *timer;
     bool init_hello;
+    bool init_enable;
     bool have_data_to_send;
     int attempt_cnt;
     QString request_line;
