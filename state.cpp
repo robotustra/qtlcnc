@@ -159,3 +159,81 @@ QString MyState::get_command(LayoutData * ld){
     }
     return ld->get_string_value_by_name(cmd_var_name);
 }
+
+//command which is send to lcnc to get value
+QString MyState::get_update_command(LayoutData * ld){
+    if (upd_cmd_name.isEmpty())
+    {
+        for (int i=1; i < ss.size(); i++) {
+            if (0 == QString::compare( "UPDCMD" , ss[i], Qt::CaseSensitive )){
+                upd_cmd_name = ss[i-1];
+            }
+        }
+    }
+    return ld->get_string_value_by_name(upd_cmd_name);
+}
+
+// group update command
+QString MyState::get_update_group_command(LayoutData * ld){
+    if (upd_group_cmd_name.isEmpty())
+    {
+        for (int i=1; i < ss.size(); i++) {
+            if (0 == QString::compare( "UPDGRCMD" , ss[i], Qt::CaseSensitive )){
+                upd_group_cmd_name = ss[i-1];
+            }
+        }
+    }
+    return ld->get_string_value_by_name(upd_group_cmd_name);
+}
+
+// if the group command is not empty peek command if used to extract value.
+QString MyState::get_peek_command(LayoutData * ld){
+    if (peek_cmd_name.isEmpty())
+    {
+        for (int i=1; i < ss.size(); i++) {
+            if (0 == QString::compare( "PEEKCMD" , ss[i], Qt::CaseSensitive )){
+                peek_cmd_name = ss[i-1];
+            }
+        }
+    }
+    return ld->get_string_value_by_name(peek_cmd_name);
+}
+
+// look for value variable to be displayed, usually it's a path variable
+QString MyState::get_value(LayoutData * ld){
+    if (value_name.isEmpty())
+    {
+        for (int i=1; i < ss.size(); i++) {
+            if (0 == QString::compare( "VALUE" , ss[i], Qt::CaseSensitive )){
+                value_name = ss[i-1];
+            }
+        }
+    }
+    return ld->get_string_value_by_name(value_name);
+}
+
+void MyState::set_value(LayoutData * ld, QString value){
+    if (value_name.isEmpty())
+    {
+        for (int i=1; i < ss.size(); i++) {
+            if (0 == QString::compare( "VALUE" , ss[i], Qt::CaseSensitive )){
+                value_name = ss[i-1];
+                ld->set_string_value_by_name(value_name, value);
+            }
+        }
+    }
+}
+
+
+// mode of update
+QString MyState::get_update_mode(LayoutData * ld){
+    if (update_mode_name.isEmpty())
+    {
+        for (int i=1; i < ss.size(); i++) {
+            if (0 == QString::compare( "UPDMODE" , ss[i], Qt::CaseSensitive )){
+                update_mode_name = ss[i-1];
+            }
+        }
+    }
+    return ld->get_string_value_by_name(update_mode_name);
+}

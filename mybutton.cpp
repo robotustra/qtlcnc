@@ -96,6 +96,22 @@ QString MyButton::get_active_state_command(){
     return QString();
 }
 
+//
+QString MyButton::get_update_group_command(){
+    if (current_state < 0 ){
+        qDebug() << "button has no states, fix ini file";
+        return QString();
+    }
+    if (this->is_visible() && ld_local != NULL){
+        //get the state configuration
+        MyState* cs = ld_local->get_state_object_by_name( elements [current_state] );
+        QString cmd = cs->get_update_group_command(ld_local);
+        cmd.remove(cmd.size()-1,1);
+        cmd.remove(0,1);
+        return cmd;
+    }
+    return QString();
+}
 // to define later
 void MyButton::selectLayoutObject(){}
 void MyButton::setLayoutObjectStatus(){}
