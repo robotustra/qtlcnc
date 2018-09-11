@@ -267,7 +267,7 @@ bool MainWindow::parse_list(QStringList& list, LayoutData* ld){
         }
         else if (!multiline_comment_on && is_var(ts))
         {
-            qDebug()<< "var found =" << ts;
+            //qDebug()<< "var found =" << ts;
             cs++;
         }
         else if (is_ml_comment_start(ts)){

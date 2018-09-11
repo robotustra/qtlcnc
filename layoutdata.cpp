@@ -49,12 +49,42 @@ void LayoutData::draw_layout(QPainter &painter, QPoint& loffset){
     //qDebug() << "num simple layouts: " << var_slayout.size();
 
     SimpleLayout * sl = NULL;
+    SimpleLayout * hl = NULL; // hidden layout
     for(uint i=0; i<var_slayout.size(); i++){
         if (var_slayout[i]->selected == true) {
             sl = var_slayout[i];
-            break;
+            //break;
+        }else{
+            //hide deselected elements
+            hl = var_slayout[i];
+            if (hl != NULL){
+                qDebug() << "other layouts = " << hl->elements.size();
+                for (int i=0; i < hl->elements.size(); i++){
+                    // extract init state of element
+                    QString el_name = hl->elements[i];
+                    QStringList complex_element;
+                    complex_element = el_name.split(":"); // try to select the init state
+                    int t;
+                    MyLayoutObject * lo = get_layout_object_by_name(complex_element[0], &t);
+                    int init_state = -1;
+                    if (complex_element.size()>1) {
+                        init_state = complex_element[1].toInt();
+                    }
+                    if (t == BUTTON){
+                        MyButton * mb = (MyButton*) lo;
+                        mb->hide();
+                        //mb->drawLayoutObject(painter, loffset);
+                    }
+                    if (t == GCODEVIEW){
+                        GCodeView * cv = (GCodeView*) lo;
+                        cv->hide();
+                        cv->drawLayoutObject(painter, loffset);
+                    }
+                }
+            }
         }
     }
+
 
     if (sl == NULL) {
         qDebug() << "no active layout to draw. Add layouts in the .ini file";
@@ -74,10 +104,12 @@ void LayoutData::draw_layout(QPainter &painter, QPoint& loffset){
         }
         if (t == BUTTON){
             MyButton * mb = (MyButton*) lo;
+            mb->show();
             mb->drawLayoutObject(painter, loffset);
         }
         if (t == GCODEVIEW){
             GCodeView * cv = (GCodeView*) lo;
+            cv->show();
             cv->drawLayoutObject(painter, loffset);
         }
     }
@@ -265,7 +297,7 @@ Path2D * LayoutData::get_path_value_by_name(QString &str_name){
 *   This function receive the command from layout element and can modify any state of the window.
 *   It can send the messages to linuxcnc system (later).
 */
-void LayoutData::processCommand(QString & cmd_org){
+void LayoutData::processCommand(QString & cmd){
     /*
         Command consisnt of name of variables in the layout data and can modify it.
         For button the number means the state.
@@ -278,8 +310,6 @@ void LayoutData::processCommand(QString & cmd_org){
 
 
     */
-    qDebug() << "cmd = " << cmd_org;
-    QString cmd = cmd_org;
     // extracting special commands
     int n = cmd.indexOf("lcnc:",0);
     if (n >= 0){

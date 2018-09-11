@@ -69,7 +69,12 @@ void GCodeView::drawLayoutObject(QPainter& painter, QPoint &loffset){
             QFont gc_font("Monospace",20); // make font autoload to state
             g_list->setFont(gc_font);
             g_list->setVisible(TRUE);
+
         }
+    }
+    if (!(this->is_visible())){
+        g_list->setVisible(FALSE);
+
     }
 }
 
