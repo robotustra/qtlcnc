@@ -22,10 +22,10 @@ void LayoutData::print_layout(){
 
 }
 
-int LayoutData::is_var_exist(LayoutData* ld, QString var){
+int LayoutData::is_var_exist(QString var){
     int i=-1;
-    for (uint j = 0; j<ld->var_name.size(); j++){
-        int x = QString::compare(ld->var_name[j], var, Qt::CaseSensitive);
+    for (uint j = 0; j<var_name.size(); j++){
+        int x = QString::compare(var_name[j], var, Qt::CaseSensitive);
         if ( x == 0 ) {
             i = j;
             return i;
@@ -143,7 +143,7 @@ bool LayoutData::is_the_same_file(QString fn){
 */
 MyLayoutObject* LayoutData::get_layout_object_by_name(QString& obj_name, int * type){
     MyLayoutObject * l_obj = NULL;
-    int idx = is_var_exist(this, obj_name);
+    int idx = is_var_exist(obj_name);
     if (-1 == idx) return NULL; // name is not found
     //we have the name of layout element now, verufy the type of it
     int t = var_type[idx];
@@ -192,7 +192,7 @@ MyLayoutObject* LayoutData::get_layout_object_by_name(QString& obj_name, int * t
 
 MyState * LayoutData::get_state_object_by_name(QString& obj_name){
     MyState * s_obj = NULL;
-    int idx = is_var_exist(this, obj_name);
+    int idx = is_var_exist(obj_name);
     if (-1 == idx) return NULL; // name is not found
     //we have the name of state element now, verufy the type of it
     int t = var_type[idx];
@@ -205,7 +205,7 @@ MyState * LayoutData::get_state_object_by_name(QString& obj_name){
 
 QPoint * LayoutData::get_pos_var_by_name(QString & pos_name){
     QPoint * pt = NULL;
-    int idx = is_var_exist(this, pos_name);
+    int idx = is_var_exist(pos_name);
     if (-1 == idx) return NULL; // name is not found
     int t = var_type[idx];
     if (t == IVEC2){
@@ -217,7 +217,7 @@ QPoint * LayoutData::get_pos_var_by_name(QString & pos_name){
 
 int LayoutData::get_int_value_by_name(QString& int_name){
     //qDebug() << "looking for var: " << int_name;
-    int val_idx = is_var_exist(this, int_name);
+    int val_idx = is_var_exist(int_name);
     //qDebug() << " var idx: " << val_idx;
     if ( val_idx >= 0 ){ // have variable
         if (this->var_type[val_idx] == INTN){
@@ -233,7 +233,7 @@ int LayoutData::get_int_value_by_name(QString& int_name){
 
 QString  LayoutData::get_string_value_by_name(QString& str_name){
     //qDebug() << "looking for var: " << str_name;
-    int val_idx = is_var_exist(this, str_name);
+    int val_idx = is_var_exist(str_name);
     //qDebug() << " var idx: " << val_idx;
     if ( val_idx >= 0 ){ // have variable
         if (this->var_type[val_idx] == STRI){
@@ -248,7 +248,7 @@ QString  LayoutData::get_string_value_by_name(QString& str_name){
 
 Path2D * LayoutData::get_path_value_by_name(QString &str_name){
     //qDebug() << "looking for var: " << str_name;
-    int val_idx = is_var_exist(this, str_name);
+    int val_idx = is_var_exist( str_name);
     //qDebug() << " var idx: " << val_idx;
     if ( val_idx >= 0 ){ // have variable
         if (this->var_type[val_idx] == PATH){
@@ -265,7 +265,7 @@ Path2D * LayoutData::get_path_value_by_name(QString &str_name){
 *   This function receive the command from layout element and can modify any state of the window.
 *   It can send the messages to linuxcnc system (later).
 */
-void LayoutData::processCommand(QString & cmd){
+void LayoutData::processCommand(QString & cmd_org){
     /*
         Command consisnt of name of variables in the layout data and can modify it.
         For button the number means the state.
@@ -278,6 +278,8 @@ void LayoutData::processCommand(QString & cmd){
 
 
     */
+    qDebug() << "cmd = " << cmd_org;
+    QString cmd = cmd_org;
     // extracting special commands
     int n = cmd.indexOf("lcnc:",0);
     if (n >= 0){
@@ -293,7 +295,6 @@ void LayoutData::processCommand(QString & cmd){
         lcnc_cmd.remove(lcnc_cmd.size()-1,1);
         //save command to lcnc variable
         set_string_value_by_name(QString("lcnc"), lcnc_cmd);
-
     }
 
     QStringList cmd_list = cmd.split(" ");
@@ -333,6 +334,14 @@ void LayoutData::processCommand(QString & cmd){
                     }
                 }
             }
+            if (lo == NULL ){
+                //not a layout element, it could be a variable
+                int idx = is_var_exist(obj_name);
+                if ( idx >=0 ) {
+                    qDebug() << "variable found: " << obj_name << " with param " << obj_param;
+                }
+            }
+
         }
 
     }
@@ -359,7 +368,7 @@ void LayoutData::update_layout_elements(QTcpSocket * socket){
 }
 
 void LayoutData::set_string_value_by_name(QString str_name, QString& value){
-    int v_idx = is_var_exist(this, str_name);
+    int v_idx = is_var_exist(str_name);
     if (-1 != v_idx && (var_type[v_idx] == STRI)){
         var_string[val_index[v_idx]] = value;
         qDebug()<< str_name << " = " << value;

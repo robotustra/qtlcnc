@@ -24,6 +24,7 @@ public:
     QString get_value(LayoutData * ld); // look for value variable to be displayed, usually it's a path variable
     void    set_value(LayoutData * ld, QString value);
     QString get_update_mode(LayoutData * ld); // mode of update
+    QString get_file_name(LayoutData * ld);
 
 
     int get_paths_number();
@@ -37,6 +38,7 @@ private:
     // PEEKCMD - the command to select value from result.
     // VALUE - the string which is updated accordingly to the polled data
     // UPDMODE - the mode of the value
+    // FILE - file name for view element as an input
 
     QString pos_var_name;
     QString size_var_name;
@@ -51,6 +53,7 @@ private:
     QString peek_cmd_name; // command is to used to peek up value from group command reply
     QString value_name;     // value to be displayed on indicator
     QString update_mode_name; // modes: continuous, group, ocasional
+    QString file_name;
 
     LayoutData * ld_local;
 

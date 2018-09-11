@@ -15,7 +15,7 @@ GCodeView::GCodeView(QMainWindow* p, QStringList &sl, LayoutData *ld, int init_s
     if (elements.size() > 0) current_state = 0;
     if ( (init_state < elements.size()) && (init_state >= 0)) current_state = init_state;
 
-    g_list->addItem(QString("line 1"));
+    //g_list->addItem(QString("line 1"));
 
 }
 
@@ -55,6 +55,14 @@ void GCodeView::drawLayoutObject(QPainter& painter, QPoint &loffset){
             Path2D * pix = cs->get_Pix(ld_local, i);
             pix->drawPath(painter, pencolor, bgcolor, pt, sz, ucell, loffset );
         }*/
+        file_name = cs->get_file_name(ld_local);
+        if (file_name.size() >= 2) {
+            file_name.remove(0,1); file_name.remove(file_name.size()-1,1); // strip quotes
+        }
+        if (g_list->count() == 0) {
+            if(file_name.isEmpty()) g_list->addItem(QString("<no file>"));
+            else g_list->addItem(QString("file: ") + file_name);
+        }
         //draw list on top of this
         if (g_list != NULL){
             g_list->setGeometry( (pt->x()-1)*ucell+loffset.x(),  (pt->y()-1)*ucell + loffset.y(), sz->x()*ucell,sz->y()*ucell );

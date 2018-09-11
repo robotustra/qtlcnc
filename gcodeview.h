@@ -32,6 +32,8 @@ private:
     LayoutData * ld_local;  // save the pointer to the data while initializing;
     QListWidget * g_list;
     QMainWindow * parent;
+    QString file_name;
+    int line_pos; // the line of g-code to be executed.
 
 
 };

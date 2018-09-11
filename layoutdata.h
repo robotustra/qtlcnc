@@ -66,7 +66,7 @@ class LayoutData
 public:
     LayoutData(QString filename);
     void print_layout();
-    int is_var_exist(LayoutData* ar, QString var);
+    int is_var_exist(QString var);
     void draw_layout(QPainter & painter, QPoint &loffset); // draw current layout according to the current state.
     bool is_the_same_file(QString fn);
     MyLayoutObject * get_layout_object_by_name(QString& obj_name, int *type);
