@@ -2,6 +2,7 @@
 #include "layoutobject.h"
 #include "state.h"
 #include "mybutton.h"
+#include <QFileDialog>
 
 LayoutData::LayoutData(QString filename)
 {
@@ -369,6 +370,15 @@ void LayoutData::processCommand(QString & cmd){
                 int idx = is_var_exist(obj_name);
                 if ( idx >=0 ) {
                     qDebug() << "variable found: " << obj_name << " with param " << obj_param;
+                    //looking for subcommand
+                    if(obj_param.contains("fileopen")){
+                        //open file dialog and if not empty assign to the string variable
+                        QString fileName = QFileDialog::getOpenFileName(NULL, QString("Open G-code"), QString(), QString("G-code (*.ngc);;All Files (*)"));
+
+                        if (!fileName.isEmpty()) {
+                            set_string_value_by_name(obj_name, fileName);
+                        }
+                    }
                 }
             }
 
