@@ -18,8 +18,11 @@ public:
     void getLayoutObjectPropertiy();
     bool isCursorOver(QPoint &pos);
     bool setState(int state);
-    MyState* getState(LayoutData* ld, QString state_name);
+    MyState* getActiveState(LayoutData* ld, QString state_name);
+    int getStateIndex();
     QString get_active_state_command();
+    QString get_update_command();
+    QString get_update_group_command();
 
 private:
 

@@ -1024,12 +1024,20 @@ void MainWindow::check_connection(){
             }
             have_data_to_send = FALSE;
         } else {
-            // update information about position of spindle.
+            // update information about
+            // estop
+            // mode
+            // joints
+            // spindle status
+            // feed
+            // axii units
+            ld->update_layout_elements(socket);
+            /*
             qDebug() << "getting ";
             QString line = "get joint_pos";
             socket->write(line.toUtf8().constData());
             socket->write("\r\n");
-            socket->flush();
+            socket->flush();*/
         }
         //qDebug() << "Connected";
     }
@@ -1074,8 +1082,36 @@ void MainWindow::parseData(QString rLine){
     // file name
     // state of machine, on/off, auto, manual, mdi
 
+    if ( rLine.contains(QString("JOINT_POS 0 ")) ){
+        QStringList pos = rLine.split(" ");
+        bool ok;
+        float x_pos = QString(pos[2]).toFloat(&ok);
+        if (ok){
+            qDebug() << "x0=" << x_pos;
+        }
+    }
+    if ( rLine.contains(QString("JOINT_POS 2 ")) ){
+        QStringList pos = rLine.split(" ");
+        bool ok;
+        float z_pos = QString(pos[2]).toFloat(&ok);
+        if (ok){
+            qDebug() << "z0=" << z_pos;
+        }
+    }
+    /*
+    QStringList p_list = rLine.split(" ");
+    // check joints
+    if (p_list.size() == 3){
+        if ( QString::compare( p_list[0],QString("JOINT_POS"))==0 &&
+             QString::compare( p_list[1],QString("0"))==0) {
+            // X joint read
+            qDebug() << "x0=" << p_list[2];
+        }
+    }*/
+
+    /*
     if ( rLine.contains(QString("JOINT_POS")) ){
         QStringList pos = rLine.split(" ");
         qDebug() << "x0=" << pos[1] << " y0=" << pos[2] << " z0=" << pos[3];
-    }
+    }*/
 }

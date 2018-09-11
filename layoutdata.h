@@ -7,7 +7,7 @@
 #include <QMatrix4x4>
 #include <QPainter>
 //#include <QtOpenGL/QtOpenGL> not ready for GL yet
-
+#include <QtNetwork/QTcpSocket>
 #include <vector>
 #include "glmesh.h"
 #include "backdrop.h"
@@ -78,6 +78,7 @@ public:
     void set_string_value_by_name(QString str_name, QString& value);
     Path2D * get_path_value_by_name(QString& str_name);
     void processCommand(QString & cmd);
+    void update_layout_elements(QTcpSocket * socket);
 
 
 protected:
