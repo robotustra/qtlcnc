@@ -20,6 +20,10 @@ bool MyButton::setState(int state){
     return false;
 }
 
+MyState* MyButton::getActiveState(LayoutData* ld, QString state_name){
+    return NULL;
+}
+
 void MyButton::drawLayoutObject(QPainter &painter, QPoint& loffset){
 // get actual data from the structure and do actual drawing of the button
     // 1) get current state
@@ -86,9 +90,33 @@ QString MyButton::get_active_state_command(){
         return QString();
     }
     if (this->is_visible() && ld_local != NULL){
+        qDebug()<< "current buton state =" << current_state;
+        //get the state configuration
+        if((current_state) >= 0 && (current_state < elements.size()) ){
+            MyState* cs = ld_local->get_state_object_by_name( elements [current_state] );
+            QString cmd = cs->get_command(ld_local);
+            if (cmd.isEmpty()) return cmd; //before remove quotes from string verify the length of string!!!
+            cmd.remove(cmd.size()-1,1);
+            cmd.remove(0,1);
+            return cmd;
+        }
+        qDebug() << "current state is invalid for button";
+    }
+    return QString();
+}
+
+//
+QString MyButton::get_update_command(){
+    if (current_state < 0 ){
+        qDebug() << "button has no states, fix ini file";
+        return QString();
+    }
+    if (this->is_visible() && ld_local != NULL){
         //get the state configuration
         MyState* cs = ld_local->get_state_object_by_name( elements [current_state] );
-        QString cmd = cs->get_command(ld_local);
+        if (cs == NULL) return QString();
+        QString cmd = cs->get_update_command(ld_local);
+        if (cmd.isEmpty()) return cmd; //before remove quotes from string verify the length of string!!!
         cmd.remove(cmd.size()-1,1);
         cmd.remove(0,1);
         return cmd;
@@ -106,12 +134,15 @@ QString MyButton::get_update_group_command(){
         //get the state configuration
         MyState* cs = ld_local->get_state_object_by_name( elements [current_state] );
         QString cmd = cs->get_update_group_command(ld_local);
+        if (cmd.isEmpty()) return cmd; //before remove quotes from string verify the length of string!!!
         cmd.remove(cmd.size()-1,1);
         cmd.remove(0,1);
         return cmd;
     }
     return QString();
 }
+
+
 // to define later
 void MyButton::selectLayoutObject(){}
 void MyButton::setLayoutObjectStatus(){}

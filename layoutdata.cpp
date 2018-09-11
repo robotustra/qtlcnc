@@ -338,6 +338,25 @@ void LayoutData::processCommand(QString & cmd){
     }
 
 }
+/*
+    Looking for UPDCMD element for active statuses of layout elements and execute them.
+*/
+void LayoutData::update_layout_elements(QTcpSocket * socket){
+    //look through all buttons because there are a lot of elements in general.
+    for(unsigned int i=0; i< var_mybutton.size(); i++){
+        //looking for active state of the button
+        //qDebug()<< "i= " << i << " size= " <<var_mybutton.size();
+        MyButton * mb = var_mybutton[i];
+        if (mb == NULL) continue;
+        QString upd_cmd = mb->get_update_command();
+        if (!upd_cmd.isEmpty()){
+            //send it to socket
+            socket->write(upd_cmd.toUtf8().constData());
+            socket->write("\r\n");
+            socket->flush();
+        }
+    }
+}
 
 void LayoutData::set_string_value_by_name(QString str_name, QString& value){
     int v_idx = is_var_exist(this, str_name);

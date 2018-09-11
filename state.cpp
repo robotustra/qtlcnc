@@ -154,10 +154,11 @@ QString MyState::get_command(LayoutData * ld){
         for (int i=1; i < ss.size(); i++) {
             if (0 == QString::compare( "CMDL" , ss[i], Qt::CaseSensitive )){
                 cmd_var_name = ss[i-1];
+                return ld->get_string_value_by_name(cmd_var_name);
             }
         }
     }
-    return ld->get_string_value_by_name(cmd_var_name);
+    return QString();
 }
 
 //command which is send to lcnc to get value
@@ -167,10 +168,16 @@ QString MyState::get_update_command(LayoutData * ld){
         for (int i=1; i < ss.size(); i++) {
             if (0 == QString::compare( "UPDCMD" , ss[i], Qt::CaseSensitive )){
                 upd_cmd_name = ss[i-1];
+                break;
             }
         }
     }
-    return ld->get_string_value_by_name(upd_cmd_name);
+    // now we shoud have update variable name.
+    if (!upd_cmd_name.isEmpty()){
+        // get variable data
+        return ld->get_string_value_by_name(upd_cmd_name);
+    }
+    return QString();
 }
 
 // group update command
@@ -180,10 +187,15 @@ QString MyState::get_update_group_command(LayoutData * ld){
         for (int i=1; i < ss.size(); i++) {
             if (0 == QString::compare( "UPDGRCMD" , ss[i], Qt::CaseSensitive )){
                 upd_group_cmd_name = ss[i-1];
+                return ld->get_string_value_by_name(upd_group_cmd_name);
             }
         }
     }
-    return ld->get_string_value_by_name(upd_group_cmd_name);
+    if (!upd_group_cmd_name.isEmpty()){
+        // get variable data
+        return ld->get_string_value_by_name(upd_group_cmd_name);
+    }
+    return QString();
 }
 
 // if the group command is not empty peek command if used to extract value.
@@ -193,23 +205,30 @@ QString MyState::get_peek_command(LayoutData * ld){
         for (int i=1; i < ss.size(); i++) {
             if (0 == QString::compare( "PEEKCMD" , ss[i], Qt::CaseSensitive )){
                 peek_cmd_name = ss[i-1];
+                return ld->get_string_value_by_name(peek_cmd_name);
             }
         }
     }
-    return ld->get_string_value_by_name(peek_cmd_name);
+    if (!peek_cmd_name.isEmpty()){
+        // get variable data
+        return ld->get_string_value_by_name(peek_cmd_name);
+    }
+    return QString();
 }
 
 // look for value variable to be displayed, usually it's a path variable
 QString MyState::get_value(LayoutData * ld){
+    //!! UPDATE value all the time
     if (value_name.isEmpty())
     {
         for (int i=1; i < ss.size(); i++) {
             if (0 == QString::compare( "VALUE" , ss[i], Qt::CaseSensitive )){
-                value_name = ss[i-1];
+                //value_name = ss[i-1];
+                return ld->get_string_value_by_name(value_name);
             }
         }
     }
-    return ld->get_string_value_by_name(value_name);
+    return QString();
 }
 
 void MyState::set_value(LayoutData * ld, QString value){
@@ -219,6 +238,7 @@ void MyState::set_value(LayoutData * ld, QString value){
             if (0 == QString::compare( "VALUE" , ss[i], Qt::CaseSensitive )){
                 value_name = ss[i-1];
                 ld->set_string_value_by_name(value_name, value);
+                return;
             }
         }
     }
