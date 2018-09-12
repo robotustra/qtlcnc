@@ -78,7 +78,9 @@ public:
     void set_string_value_by_name(QString str_name, QString& value);
     Path2D * get_path_value_by_name(QString& str_name);
     void processCommand(QString & cmd);
-    void update_layout_elements(QTcpSocket * socket);
+    void send_update_layout_elements(QTcpSocket * socket);
+    void parseReply(QString rLine);
+    void removeQuotes( QString & str);
 
 
 protected:

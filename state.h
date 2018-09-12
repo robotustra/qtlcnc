@@ -20,11 +20,12 @@ public:
     QString get_command(LayoutData * ld); // return the command string associated with this state when activated
     QString get_update_command(LayoutData * ld); //command which is send to lcnc to get value;
     QString get_update_group_command(LayoutData * ld); // group update command
-    QString get_peek_command(LayoutData * ld); // if the group command is not empty peek command if used to extract value.
+    QString get_peek_mask(LayoutData * ld); // if the group command is not empty peek mask if used to extract value.
     QString get_value(LayoutData * ld); // look for value variable to be displayed, usually it's a path variable
     void    set_value(LayoutData * ld, QString value);
     QString get_update_mode(LayoutData * ld); // mode of update
     QString get_file_name(LayoutData * ld);
+    QString get_change_state_script(LayoutData * ld); // executed when the new value is got from outside
 
 
     int get_paths_number();
@@ -35,10 +36,12 @@ private:
     //"sb_pos", "POS", "size_2x2", "SIZE", "bg_color", "BGCOL", "p_color", "PCOL", "sb_pic1", "PIX", "stop_cmd", "CMDL", "stop_status", "STATL" txt TXT
     // UCMD - update command, the command which is executed to get data for update
     // UGCMD - update group command
-    // PEEKCMD - the command to select value from result.
+    // PMASK - the mask to select value from result.
     // VALUE - the string which is updated accordingly to the polled data
     // UPDMODE - the mode of the value
     // FILE - file name for view element as an input
+    // STCMD - state change script
+
 
     QString pos_var_name;
     QString size_var_name;
@@ -54,6 +57,7 @@ private:
     QString value_name;     // value to be displayed on indicator
     QString update_mode_name; // modes: continuous, group, ocasional
     QString file_name;
+    QString change_state_sctipt;
 
     LayoutData * ld_local;
 

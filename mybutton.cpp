@@ -105,6 +105,12 @@ QString MyButton::get_active_state_command(){
     return QString();
 }
 
+void MyButton::removeQuotes( QString & str){
+    if (str.size() >= 2) {
+        if ((str[str.size()-1] == QChar('\"')) || (str[str.size()-1] == QChar('\''))) str.remove(str.size()-1,1);
+        if ((str[0] == QChar('\"')) || (str[0] == QChar('\''))) str.remove(0,1);
+    }
+}
 //
 QString MyButton::get_update_command(){
     if (current_state < 0 ){
@@ -142,6 +148,73 @@ QString MyButton::get_update_group_command(){
     return QString();
 }
 
+QString MyButton::get_peek_mask(){
+    if (current_state < 0 ){
+        qDebug() << "button has no states, fix ini file";
+        return QString();
+    }
+    if (this->is_visible() && ld_local != NULL){
+        //get the state configuration
+        MyState* cs = ld_local->get_state_object_by_name( elements [current_state] );
+        if (cs == NULL) return QString();
+        QString pm = cs->get_peek_mask(ld_local);
+        //qDebug() << "peek mask =" << pm;
+        if (pm.isEmpty()) return pm; //before remove quotes from string verify the length of string!!!
+        pm.remove(pm.size()-1,1); // remove ' ' quotes
+        pm.remove(0,1);
+        return pm;
+    }
+    return QString();
+}
+QString MyButton::get_value(){
+    if (current_state < 0 ){
+        qDebug() << "button has no states, fix ini file";
+        return QString();
+    }
+    if (this->is_visible() && ld_local != NULL){
+        //get the state configuration
+        MyState* cs = ld_local->get_state_object_by_name( elements [current_state] );
+        if (cs == NULL) return QString();
+        QString pm = cs->get_value(ld_local);
+        //qDebug() << " value to mod =" << pm;
+        if (pm.isEmpty()) return pm; //before remove quotes from string verify the length of string!!!
+        removeQuotes(pm);
+        return pm;
+    }
+    return QString();
+}
+
+QString MyButton::get_change_state_script(){
+    if (current_state < 0 ){
+        qDebug() << "button has no states, fix ini file";
+        return QString();
+    }
+    if (this->is_visible() && ld_local != NULL){
+        //get the state configuration
+        MyState* cs = ld_local->get_state_object_by_name( elements [current_state] );
+        if (cs == NULL) return QString();
+        QString pm = cs->get_change_state_script(ld_local);
+        //qDebug() << " value to mod =" << pm;
+        if (pm.isEmpty()) return pm; //before remove quotes from string verify the length of string!!!
+        removeQuotes(pm);
+        return pm;
+    }
+    return QString();
+}
+
+void MyButton::set_value(QString val_str ){
+    if (current_state < 0 ){
+        qDebug() << "button has no states, fix ini file";
+        return;
+    }
+    if (this->is_visible() && ld_local != NULL){
+        //get the state configuration
+        MyState* cs = ld_local->get_state_object_by_name( elements [current_state] );
+        if (cs == NULL) return;
+        cs->set_value(ld_local, val_str);
+    }
+    return;
+}
 
 // to define later
 void MyButton::selectLayoutObject(){}

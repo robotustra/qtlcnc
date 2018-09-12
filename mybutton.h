@@ -23,6 +23,11 @@ public:
     QString get_active_state_command();
     QString get_update_command();
     QString get_update_group_command();
+    QString get_peek_mask(); // A pattern to process
+    void removeQuotes( QString & str);
+    QString get_value();
+    void set_value(QString val);
+    QString get_change_state_script();
 
 private:
 

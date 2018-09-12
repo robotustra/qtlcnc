@@ -1,11 +1,13 @@
 #include "path.h"
 #include <QDebug>
+#include"layoutdata.h"
 
 
 
-Path2D::Path2D(QStringList &sl)
+Path2D::Path2D(QStringList &sl, LayoutData *ld)
 {
     p = sl;
+    ld_local = ld;
 }
 
 void Path2D::drawPath(QPainter& painter, QString& pencolor, QString& bgcolor, QPoint * pos, QPoint * sz, int ucell, QPoint& loffset){
@@ -117,7 +119,14 @@ void Path2D::drawPath(QPainter& painter, QString& pencolor, QString& bgcolor, QP
             QString ffont = crd[2];
             int h = crd[3].toInt() * sc_x;
             QString txt = crd[4];
-
+            // test could be a name of variable, se we do look up
+            if (ld_local !=NULL){
+                int idx = ld_local->is_var_exist(txt);
+                if(idx>= 0) {
+                    txt = ld_local->get_string_value_by_name(txt);
+                    removeQuotes(txt);
+                }
+            }
             QFont fnt = QFont(ffont,h, 1);
 
             path.addText(x0+x,y0+y,fnt, txt);
@@ -233,4 +242,11 @@ void Path2D::drawPath(QPainter& painter, QString& pencolor, QString& bgcolor, QP
     }*/
 
 
+}
+
+void Path2D::removeQuotes( QString & str){
+    if (str.size() >= 2) {
+        if ((str[str.size()-1] == QChar('\"')) || (str[str.size()-1] == QChar('\''))) str.remove(str.size()-1,1);
+        if ((str[0] == QChar('\"')) || (str[0] == QChar('\''))) str.remove(0,1);
+    }
 }
