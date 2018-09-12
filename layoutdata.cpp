@@ -337,9 +337,9 @@ void LayoutData::processCommand(QString & cmd){
             QStringList obj = tmp.split(":");
 
             QString obj_name = obj[0];
-            qDebug() << "object name " << obj_name;
+            //qDebug() << "object name " << obj_name;
             QString obj_param = obj[1];
-            qDebug() << "obj_param " << obj_param;
+            //qDebug() << "obj_param " << obj_param;
             int t;
             MyLayoutObject * lo = get_layout_object_by_name(obj_name, &t);
             if (t == BUTTON){
@@ -369,8 +369,8 @@ void LayoutData::processCommand(QString & cmd){
                 //not a layout element, it could be a variable
                 int idx = is_var_exist(obj_name);
                 if ( idx >=0 ) {
-                    qDebug() << "variable found: " << obj_name << " with param " << obj_param;
-                    //looking for subcommand
+                    //qDebug() << "variable found: " << obj_name << " with param " << obj_param;
+                    //looking for SPECIAL COMMANS to bind with GUI elements
                     if(obj_param.contains("fileopen")){
                         //open file dialog and if not empty assign to the string variable
                         QString fileName = QFileDialog::getOpenFileName(NULL, QString("Open G-code"), QString(), QString("G-code (*.ngc);;All Files (*)"));
@@ -423,11 +423,10 @@ void LayoutData::parseReply(QString rLine){
         if (!p_mask.isEmpty()){
             // prepare p_mask. We are looking to extract parameter in front of $ sign.
             //peek up the value from reply
-            rLine.remove("\r\n");
             QStringList p_list = p_mask.split(" ");
             QStringList r_list = rLine.split(" ");
             QString val;
-            qDebug()<< "comparing " << p_list << " and "<< r_list;
+            //qDebug()<< "comparing " << p_list << " and "<< r_list;
             if (p_list.size() == r_list.size()){
                 // compare 2 lists to extract value in front of $
                 // the beginning of the list should match otherwise it's not our case.
@@ -454,16 +453,21 @@ void LayoutData::parseReply(QString rLine){
                     mb->set_value(sign + QString::number(f_val,'f',4));
                 }else{
                     //val is not a number, just print it for now
-                    qDebug()<< "string value =" << val;
+
+                    //qDebug()<< "val =" << val;
+
                     //do something on the base of result of value,
                     // if its ON or OFF the button should change status accordinly, or even
                     //change state of other elements. The format of script which is executed
                     // will be
                     // 'ON:do_on_cmd_string OFF:do_off_cmd_string"
                     if (QString::compare(old_val, val) != 0){
+                        mb->set_value(val);
                         // execute command only if it changed
                         QString chst = mb->get_change_state_script();
-                        qDebug() << "change state script = " << chst;
+
+                        //qDebug() << "change state script = " << chst;
+
                         //extracting the script to execute
                         QStringList cmd_list = chst.split(" ");
 
@@ -474,32 +478,26 @@ void LayoutData::parseReply(QString rLine){
                                 QStringList obj = tmp.split(":");
 
                                 QString val_name = obj[0];
-                                qDebug() << "val = " << val_name;
+                                //qDebug() << "val = " << val_name;
                                 QString val_param = obj[1];
-                                qDebug() << "param = " << val_param;
+                                //qDebug() << "param = " << val_param;
 
                                 if(QString::compare(val_name, val)== 0){
                                     if(!val_param.isEmpty()){
                                         QString cmd0= get_string_value_by_name(val_param);
                                         removeQuotes(cmd0);
+                                        qDebug() << cmd0;
                                         processCommand(cmd0);
                                         break;
                                     }
                                 }
                             }
                         }
-                        mb->set_value(val);
                     }
-
-
                 }
-
             }
-
         }
     }
-
-
 }
 
 void LayoutData::removeQuotes( QString & str){
@@ -513,7 +511,7 @@ void LayoutData::set_string_value_by_name(QString str_name, QString& value){
     int v_idx = is_var_exist(str_name);
     if (-1 != v_idx && (var_type[v_idx] == STRI)){
         var_string[val_index[v_idx]] = value;
-        qDebug()<< str_name << " = " << value;
+        //qDebug()<< str_name << " = " << value;
 
     }else{
        qDebug()<< "variable name do not exist:" << str_name;

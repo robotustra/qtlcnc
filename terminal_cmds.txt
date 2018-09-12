@@ -1,0 +1,7 @@
+set mode manual
+set jog_incr 2 -15 1 # move z in positive directoin
+
+set jog 0 -10	# continuous motion
+set jog_stop 0
+set jog 0 10
+set jog_stop 0

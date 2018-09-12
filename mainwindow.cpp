@@ -1049,7 +1049,8 @@ void MainWindow::readData()
     QString readLine = socket->readLine();
     QString repl = readLine.right(5);
 
-    qDebug() << readLine;
+    //qDebug() << readLine;
+    readLine.remove("\r\n");
     parseData(readLine);
 
     if(socket->canReadLine()) readData();

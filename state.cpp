@@ -262,14 +262,14 @@ QString MyState::get_value(LayoutData * ld){
         for (int i=1; i < ss.size(); i++) {
             if (0 == QString::compare( "VALUE" , ss[i], Qt::CaseSensitive )){
                 value_name = ss[i-1];
-                qDebug()<< "value name= " << value_name;
+                //qDebug()<< "value name= " << value_name;
                 return ld->get_string_value_by_name(value_name);
             }
         }
     }
     if (!value_name.isEmpty()){
         // get variable data
-        qDebug()<< "value name= " << value_name;
+        //qDebug()<< "value name= " << value_name;
         return ld->get_string_value_by_name(value_name);
     }
     return QString();
