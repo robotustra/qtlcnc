@@ -176,7 +176,25 @@ QString MyButton::get_value(){
         MyState* cs = ld_local->get_state_object_by_name( elements [current_state] );
         if (cs == NULL) return QString();
         QString pm = cs->get_value(ld_local);
-        qDebug() << " value to mod =" << pm;
+        //qDebug() << " value to mod =" << pm;
+        if (pm.isEmpty()) return pm; //before remove quotes from string verify the length of string!!!
+        removeQuotes(pm);
+        return pm;
+    }
+    return QString();
+}
+
+QString MyButton::get_change_state_script(){
+    if (current_state < 0 ){
+        qDebug() << "button has no states, fix ini file";
+        return QString();
+    }
+    if (this->is_visible() && ld_local != NULL){
+        //get the state configuration
+        MyState* cs = ld_local->get_state_object_by_name( elements [current_state] );
+        if (cs == NULL) return QString();
+        QString pm = cs->get_change_state_script(ld_local);
+        //qDebug() << " value to mod =" << pm;
         if (pm.isEmpty()) return pm; //before remove quotes from string verify the length of string!!!
         removeQuotes(pm);
         return pm;

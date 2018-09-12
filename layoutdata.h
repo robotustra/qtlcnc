@@ -80,6 +80,7 @@ public:
     void processCommand(QString & cmd);
     void send_update_layout_elements(QTcpSocket * socket);
     void parseReply(QString rLine);
+    void removeQuotes( QString & str);
 
 
 protected:

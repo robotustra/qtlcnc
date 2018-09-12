@@ -221,6 +221,23 @@ QString MyState::get_peek_mask(LayoutData * ld){
     return QString();
 }
 
+QString MyState::get_change_state_script(LayoutData * ld){
+    if (change_state_sctipt.isEmpty())
+    {
+        for (int i=1; i < ss.size(); i++) {
+            if (0 == QString::compare( "STCMD" , ss[i], Qt::CaseSensitive )){
+                change_state_sctipt = ss[i-1];
+                return ld->get_string_value_by_name(ss[i-1]);
+            }
+        }
+    }
+    if (!change_state_sctipt.isEmpty()){
+        // get variable data
+        return ld->get_string_value_by_name(change_state_sctipt);
+    }
+    return QString();
+}
+
 QString MyState::get_file_name(LayoutData * ld){
     if (file_name.isEmpty()) {
         for (int i=1; i < ss.size(); i++) {

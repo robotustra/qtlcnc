@@ -423,7 +423,7 @@ void LayoutData::parseReply(QString rLine){
         if (!p_mask.isEmpty()){
             // prepare p_mask. We are looking to extract parameter in front of $ sign.
             //peek up the value from reply
-
+            rLine.remove("\r\n");
             QStringList p_list = p_mask.split(" ");
             QStringList r_list = rLine.split(" ");
             QString val;
@@ -434,23 +434,64 @@ void LayoutData::parseReply(QString rLine){
                 int fit_cnt = 0;
                 for (int j=0; j<p_list.size(); j++){
                     if((QString::compare(p_list[j], r_list[j]) == 0) || (p_list[j] == QString("_")) ) fit_cnt++;
+                    else
                     if((fit_cnt == j )&& (p_list[j] == QString("$"))){
                         //got the value
-                        qDebug()<< "value = " << r_list[j]; // dont need to continue
                         val = r_list[j];
                         break;
                     }
                 }
+                if (val.isEmpty()) continue; // didn't find anything, goto next loop
                 // process value, it's suppose to be a float number
                 bool ok = FALSE;
                 float f_val = val.toFloat(&ok);
+                QString old_val = mb->get_value();
                 if(ok){
                     // modify existing value
-                    QString old_val = mb->get_value();
-                    qDebug() << "value to modify" << old_val << " new  val " << f_val;
+                    //qDebug() << "value to modify" << old_val << " new  val " << f_val;
                     QString sign = "+";
                     if (f_val < 0) sign="";
                     mb->set_value(sign + QString::number(f_val,'f',4));
+                }else{
+                    //val is not a number, just print it for now
+                    qDebug()<< "string value =" << val;
+                    //do something on the base of result of value,
+                    // if its ON or OFF the button should change status accordinly, or even
+                    //change state of other elements. The format of script which is executed
+                    // will be
+                    // 'ON:do_on_cmd_string OFF:do_off_cmd_string"
+                    if (QString::compare(old_val, val) != 0){
+                        // execute command only if it changed
+                        QString chst = mb->get_change_state_script();
+                        qDebug() << "change state script = " << chst;
+                        //extracting the script to execute
+                        QStringList cmd_list = chst.split(" ");
+
+                        for (int k=0; k < cmd_list.size(); k++){
+                            // select the name of object
+                            QString tmp = cmd_list[k];
+                            if (!tmp.isEmpty() && tmp.contains(":")){
+                                QStringList obj = tmp.split(":");
+
+                                QString val_name = obj[0];
+                                qDebug() << "val = " << val_name;
+                                QString val_param = obj[1];
+                                qDebug() << "param = " << val_param;
+
+                                if(QString::compare(val_name, val)== 0){
+                                    if(!val_param.isEmpty()){
+                                        QString cmd0= get_string_value_by_name(val_param);
+                                        removeQuotes(cmd0);
+                                        processCommand(cmd0);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        mb->set_value(val);
+                    }
+
+
                 }
 
             }
@@ -459,6 +500,13 @@ void LayoutData::parseReply(QString rLine){
     }
 
 
+}
+
+void LayoutData::removeQuotes( QString & str){
+    if (str.size() >= 2) {
+        if ((str[str.size()-1] == QChar('\"')) || (str[str.size()-1] == QChar('\''))) str.remove(str.size()-1,1);
+        if ((str[0] == QChar('\"')) || (str[0] == QChar('\''))) str.remove(0,1);
+    }
 }
 
 void LayoutData::set_string_value_by_name(QString str_name, QString& value){

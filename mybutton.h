@@ -27,6 +27,7 @@ public:
     void removeQuotes( QString & str);
     QString get_value();
     void set_value(QString val);
+    QString get_change_state_script();
 
 private:
 
