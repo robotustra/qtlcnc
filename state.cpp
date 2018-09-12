@@ -204,13 +204,13 @@ QString MyState::get_update_group_command(LayoutData * ld){
 }
 
 // if the group command is not empty peek command if used to extract value.
-QString MyState::get_peek_command(LayoutData * ld){
+QString MyState::get_peek_mask(LayoutData * ld){
     if (peek_cmd_name.isEmpty())
     {
         for (int i=1; i < ss.size(); i++) {
-            if (0 == QString::compare( "PEEKCMD" , ss[i], Qt::CaseSensitive )){
+            if (0 == QString::compare( "PMASK" , ss[i], Qt::CaseSensitive )){
                 peek_cmd_name = ss[i-1];
-                return ld->get_string_value_by_name(peek_cmd_name);
+                return ld->get_string_value_by_name(ss[i-1]);
             }
         }
     }
@@ -244,10 +244,16 @@ QString MyState::get_value(LayoutData * ld){
     {
         for (int i=1; i < ss.size(); i++) {
             if (0 == QString::compare( "VALUE" , ss[i], Qt::CaseSensitive )){
-                //value_name = ss[i-1];
+                value_name = ss[i-1];
+                qDebug()<< "value name= " << value_name;
                 return ld->get_string_value_by_name(value_name);
             }
         }
+    }
+    if (!value_name.isEmpty()){
+        // get variable data
+        qDebug()<< "value name= " << value_name;
+        return ld->get_string_value_by_name(value_name);
     }
     return QString();
 }
@@ -262,6 +268,10 @@ void MyState::set_value(LayoutData * ld, QString value){
                 return;
             }
         }
+    }
+    if (!value_name.isEmpty()){
+        // get variable data
+        ld->set_string_value_by_name(value_name, value);
     }
 }
 

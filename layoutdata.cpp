@@ -59,7 +59,7 @@ void LayoutData::draw_layout(QPainter &painter, QPoint& loffset){
             //hide deselected elements
             hl = var_slayout[i];
             if (hl != NULL){
-                qDebug() << "other layouts = " << hl->elements.size();
+                //qDebug() << "other layouts = " << hl->elements.size();
                 for (int i=0; i < hl->elements.size(); i++){
                     // extract init state of element
                     QString el_name = hl->elements[i];
@@ -390,8 +390,9 @@ void LayoutData::processCommand(QString & cmd){
 /*
     Looking for UPDCMD element for active statuses of layout elements and execute them.
 */
-void LayoutData::update_layout_elements(QTcpSocket * socket){
-    //look through all buttons because there are a lot of elements in general.
+void LayoutData::send_update_layout_elements(QTcpSocket * socket){
+    // look through all buttons because there are a lot of elements in general.
+    // indicators are also buttons
     for(unsigned int i=0; i< var_mybutton.size(); i++){
         //looking for active state of the button
         //qDebug()<< "i= " << i << " size= " <<var_mybutton.size();
@@ -405,6 +406,59 @@ void LayoutData::update_layout_elements(QTcpSocket * socket){
             socket->flush();
         }
     }
+}
+
+void LayoutData::parseReply(QString rLine){
+    // update indicators, feedrate, button states, spindle encoder, file line, opened file
+    // joints
+    // units
+    // file name
+    // state of machine, on/off, auto, manual, mdi
+    for(unsigned int i=0; i< var_mybutton.size(); i++){
+        //looking for active state of the button
+        //qDebug()<< "i= " << i << " size= " <<var_mybutton.size();
+        MyButton * mb = var_mybutton[i];
+        if (mb == NULL) continue;
+        QString p_mask = mb->get_peek_mask();
+        if (!p_mask.isEmpty()){
+            // prepare p_mask. We are looking to extract parameter in front of $ sign.
+            //peek up the value from reply
+
+            QStringList p_list = p_mask.split(" ");
+            QStringList r_list = rLine.split(" ");
+            QString val;
+            qDebug()<< "comparing " << p_list << " and "<< r_list;
+            if (p_list.size() == r_list.size()){
+                // compare 2 lists to extract value in front of $
+                // the beginning of the list should match otherwise it's not our case.
+                int fit_cnt = 0;
+                for (int j=0; j<p_list.size(); j++){
+                    if((QString::compare(p_list[j], r_list[j]) == 0) || (p_list[j] == QString("_")) ) fit_cnt++;
+                    if((fit_cnt == j )&& (p_list[j] == QString("$"))){
+                        //got the value
+                        qDebug()<< "value = " << r_list[j]; // dont need to continue
+                        val = r_list[j];
+                        break;
+                    }
+                }
+                // process value, it's suppose to be a float number
+                bool ok = FALSE;
+                float f_val = val.toFloat(&ok);
+                if(ok){
+                    // modify existing value
+                    QString old_val = mb->get_value();
+                    qDebug() << "value to modify" << old_val << " new  val " << f_val;
+                    QString sign = "+";
+                    if (f_val < 0) sign="";
+                    mb->set_value(sign + QString::number(f_val,'f',4));
+                }
+
+            }
+
+        }
+    }
+
+
 }
 
 void LayoutData::set_string_value_by_name(QString str_name, QString& value){

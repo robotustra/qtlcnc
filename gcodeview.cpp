@@ -57,7 +57,7 @@ void GCodeView::drawLayoutObject(QPainter& painter, QPoint &loffset){
         }*/
 
         file_name = cs->get_file_name(ld_local);
-        qDebug() << "file name = " << file_name;
+        //qDebug() << "file name = " << file_name;
         removeQuotes(file_name);
         if (isFileNameChanged(file_name)){
             g_list->clear();

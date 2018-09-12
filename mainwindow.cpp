@@ -921,7 +921,7 @@ Path2D* MainWindow::get_path_value(QStringList& list, int& cs, LayoutData *dl){
     // no verification yet.
     cs = cs; // not used yet
     dl = dl; // not used yet
-    return new Path2D(list);
+    return new Path2D(list, dl);
 }
 
 // Getting strings parameters and prepare constructor State
@@ -1008,6 +1008,10 @@ void MainWindow::check_connection(){
             socket->write(line.toUtf8().constData());
             socket->write("\r\n");
             socket->flush();
+            line = "set echo off";
+            socket->write(line.toUtf8().constData());
+            socket->write("\r\n");
+            socket->flush();
             init_enable = TRUE;
             timer->stop();
             timer->start(200);
@@ -1032,7 +1036,7 @@ void MainWindow::check_connection(){
             // feed
             // axii units
 
-            ld->update_layout_elements(socket);
+            ld->send_update_layout_elements(socket);
 
         }
         //qDebug() << "Connected";
@@ -1072,42 +1076,12 @@ void MainWindow::disconnectFromServer()
 // process the data received from linuxcncrsh
 // if new info is recieved update leyout.
 void MainWindow::parseData(QString rLine){
-    // update indicators, feedrate, button states, spindle encoder, file line, opened file
+    // update layout elements according to replay
+    // indicators, feedrate, button states, spindle encoder, file line, opened file
     // joints
     // units
     // file name
     // state of machine, on/off, auto, manual, mdi
-
-    if ( rLine.contains(QString("JOINT_POS 0 ")) ){
-        QStringList pos = rLine.split(" ");
-        bool ok;
-        float x_pos = QString(pos[2]).toFloat(&ok);
-        if (ok){
-            qDebug() << "x0=" << x_pos;
-        }
-    }
-    if ( rLine.contains(QString("JOINT_POS 2 ")) ){
-        QStringList pos = rLine.split(" ");
-        bool ok;
-        float z_pos = QString(pos[2]).toFloat(&ok);
-        if (ok){
-            qDebug() << "z0=" << z_pos;
-        }
-    }
-    /*
-    QStringList p_list = rLine.split(" ");
-    // check joints
-    if (p_list.size() == 3){
-        if ( QString::compare( p_list[0],QString("JOINT_POS"))==0 &&
-             QString::compare( p_list[1],QString("0"))==0) {
-            // X joint read
-            qDebug() << "x0=" << p_list[2];
-        }
-    }*/
-
-    /*
-    if ( rLine.contains(QString("JOINT_POS")) ){
-        QStringList pos = rLine.split(" ");
-        qDebug() << "x0=" << pos[1] << " y0=" << pos[2] << " z0=" << pos[3];
-    }*/
+    ld->parseReply(rLine);
+    update();
 }
