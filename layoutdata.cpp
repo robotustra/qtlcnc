@@ -2,6 +2,7 @@
 #include "layoutobject.h"
 #include "state.h"
 #include "mybutton.h"
+#include <QFileDialog>
 
 LayoutData::LayoutData(QString filename)
 {
@@ -22,10 +23,10 @@ void LayoutData::print_layout(){
 
 }
 
-int LayoutData::is_var_exist(LayoutData* ld, QString var){
+int LayoutData::is_var_exist(QString var){
     int i=-1;
-    for (uint j = 0; j<ld->var_name.size(); j++){
-        int x = QString::compare(ld->var_name[j], var, Qt::CaseSensitive);
+    for (uint j = 0; j<var_name.size(); j++){
+        int x = QString::compare(var_name[j], var, Qt::CaseSensitive);
         if ( x == 0 ) {
             i = j;
             return i;
@@ -49,12 +50,42 @@ void LayoutData::draw_layout(QPainter &painter, QPoint& loffset){
     //qDebug() << "num simple layouts: " << var_slayout.size();
 
     SimpleLayout * sl = NULL;
+    SimpleLayout * hl = NULL; // hidden layout
     for(uint i=0; i<var_slayout.size(); i++){
         if (var_slayout[i]->selected == true) {
             sl = var_slayout[i];
-            break;
+            //break;
+        }else{
+            //hide deselected elements
+            hl = var_slayout[i];
+            if (hl != NULL){
+                qDebug() << "other layouts = " << hl->elements.size();
+                for (int i=0; i < hl->elements.size(); i++){
+                    // extract init state of element
+                    QString el_name = hl->elements[i];
+                    QStringList complex_element;
+                    complex_element = el_name.split(":"); // try to select the init state
+                    int t;
+                    MyLayoutObject * lo = get_layout_object_by_name(complex_element[0], &t);
+                    int init_state = -1;
+                    if (complex_element.size()>1) {
+                        init_state = complex_element[1].toInt();
+                    }
+                    if (t == BUTTON){
+                        MyButton * mb = (MyButton*) lo;
+                        mb->hide();
+                        //mb->drawLayoutObject(painter, loffset);
+                    }
+                    if (t == GCODEVIEW){
+                        GCodeView * cv = (GCodeView*) lo;
+                        cv->hide();
+                        cv->drawLayoutObject(painter, loffset);
+                    }
+                }
+            }
         }
     }
+
 
     if (sl == NULL) {
         qDebug() << "no active layout to draw. Add layouts in the .ini file";
@@ -74,10 +105,12 @@ void LayoutData::draw_layout(QPainter &painter, QPoint& loffset){
         }
         if (t == BUTTON){
             MyButton * mb = (MyButton*) lo;
+            mb->show();
             mb->drawLayoutObject(painter, loffset);
         }
         if (t == GCODEVIEW){
             GCodeView * cv = (GCodeView*) lo;
+            cv->show();
             cv->drawLayoutObject(painter, loffset);
         }
     }
@@ -143,7 +176,7 @@ bool LayoutData::is_the_same_file(QString fn){
 */
 MyLayoutObject* LayoutData::get_layout_object_by_name(QString& obj_name, int * type){
     MyLayoutObject * l_obj = NULL;
-    int idx = is_var_exist(this, obj_name);
+    int idx = is_var_exist(obj_name);
     if (-1 == idx) return NULL; // name is not found
     //we have the name of layout element now, verufy the type of it
     int t = var_type[idx];
@@ -192,7 +225,7 @@ MyLayoutObject* LayoutData::get_layout_object_by_name(QString& obj_name, int * t
 
 MyState * LayoutData::get_state_object_by_name(QString& obj_name){
     MyState * s_obj = NULL;
-    int idx = is_var_exist(this, obj_name);
+    int idx = is_var_exist(obj_name);
     if (-1 == idx) return NULL; // name is not found
     //we have the name of state element now, verufy the type of it
     int t = var_type[idx];
@@ -205,7 +238,7 @@ MyState * LayoutData::get_state_object_by_name(QString& obj_name){
 
 QPoint * LayoutData::get_pos_var_by_name(QString & pos_name){
     QPoint * pt = NULL;
-    int idx = is_var_exist(this, pos_name);
+    int idx = is_var_exist(pos_name);
     if (-1 == idx) return NULL; // name is not found
     int t = var_type[idx];
     if (t == IVEC2){
@@ -217,7 +250,7 @@ QPoint * LayoutData::get_pos_var_by_name(QString & pos_name){
 
 int LayoutData::get_int_value_by_name(QString& int_name){
     //qDebug() << "looking for var: " << int_name;
-    int val_idx = is_var_exist(this, int_name);
+    int val_idx = is_var_exist(int_name);
     //qDebug() << " var idx: " << val_idx;
     if ( val_idx >= 0 ){ // have variable
         if (this->var_type[val_idx] == INTN){
@@ -233,7 +266,7 @@ int LayoutData::get_int_value_by_name(QString& int_name){
 
 QString  LayoutData::get_string_value_by_name(QString& str_name){
     //qDebug() << "looking for var: " << str_name;
-    int val_idx = is_var_exist(this, str_name);
+    int val_idx = is_var_exist(str_name);
     //qDebug() << " var idx: " << val_idx;
     if ( val_idx >= 0 ){ // have variable
         if (this->var_type[val_idx] == STRI){
@@ -248,7 +281,7 @@ QString  LayoutData::get_string_value_by_name(QString& str_name){
 
 Path2D * LayoutData::get_path_value_by_name(QString &str_name){
     //qDebug() << "looking for var: " << str_name;
-    int val_idx = is_var_exist(this, str_name);
+    int val_idx = is_var_exist( str_name);
     //qDebug() << " var idx: " << val_idx;
     if ( val_idx >= 0 ){ // have variable
         if (this->var_type[val_idx] == PATH){
@@ -293,7 +326,6 @@ void LayoutData::processCommand(QString & cmd){
         lcnc_cmd.remove(lcnc_cmd.size()-1,1);
         //save command to lcnc variable
         set_string_value_by_name(QString("lcnc"), lcnc_cmd);
-
     }
 
     QStringList cmd_list = cmd.split(" ");
@@ -333,6 +365,23 @@ void LayoutData::processCommand(QString & cmd){
                     }
                 }
             }
+            if (lo == NULL ){
+                //not a layout element, it could be a variable
+                int idx = is_var_exist(obj_name);
+                if ( idx >=0 ) {
+                    qDebug() << "variable found: " << obj_name << " with param " << obj_param;
+                    //looking for subcommand
+                    if(obj_param.contains("fileopen")){
+                        //open file dialog and if not empty assign to the string variable
+                        QString fileName = QFileDialog::getOpenFileName(NULL, QString("Open G-code"), QString(), QString("G-code (*.ngc);;All Files (*)"));
+
+                        if (!fileName.isEmpty()) {
+                            set_string_value_by_name(obj_name, fileName);
+                        }
+                    }
+                }
+            }
+
         }
 
     }
@@ -359,7 +408,7 @@ void LayoutData::update_layout_elements(QTcpSocket * socket){
 }
 
 void LayoutData::set_string_value_by_name(QString str_name, QString& value){
-    int v_idx = is_var_exist(this, str_name);
+    int v_idx = is_var_exist(str_name);
     if (-1 != v_idx && (var_type[v_idx] == STRI)){
         var_string[val_index[v_idx]] = value;
         qDebug()<< str_name << " = " << value;

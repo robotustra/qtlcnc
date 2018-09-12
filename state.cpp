@@ -158,6 +158,11 @@ QString MyState::get_command(LayoutData * ld){
             }
         }
     }
+    // now we shoud have variable name.
+    if (!cmd_var_name.isEmpty()){
+        // get variable data
+        return ld->get_string_value_by_name(cmd_var_name);
+    }
     return QString();
 }
 
@@ -212,6 +217,22 @@ QString MyState::get_peek_command(LayoutData * ld){
     if (!peek_cmd_name.isEmpty()){
         // get variable data
         return ld->get_string_value_by_name(peek_cmd_name);
+    }
+    return QString();
+}
+
+QString MyState::get_file_name(LayoutData * ld){
+    if (file_name.isEmpty()) {
+        for (int i=1; i < ss.size(); i++) {
+            if (0 == QString::compare( "FILE" , ss[i], Qt::CaseSensitive )){
+                file_name = ss[i-1];
+                return ld->get_string_value_by_name(file_name);
+            }
+        }
+    }
+    if (!file_name.isEmpty()){
+        // get variable data
+        return ld->get_string_value_by_name(file_name);
     }
     return QString();
 }

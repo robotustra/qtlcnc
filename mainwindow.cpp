@@ -267,7 +267,7 @@ bool MainWindow::parse_list(QStringList& list, LayoutData* ld){
         }
         else if (!multiline_comment_on && is_var(ts))
         {
-            qDebug()<< "var found =" << ts;
+            //qDebug()<< "var found =" << ts;
             cs++;
         }
         else if (is_ml_comment_start(ts)){
@@ -582,7 +582,7 @@ bool MainWindow::exec_word(QStringList& list, int& cs, LayoutData *ld){
 bool MainWindow::exec_IVAR(QStringList& list, int& cs, LayoutData *dl){
     list.removeAt(cs); cs--; //remove "IVAR" keyword
     QString var = list.takeAt(cs); cs--;
-    int v_idx = dl->is_var_exist(dl, var);
+    int v_idx = dl->is_var_exist(var);
     if (-1 == v_idx ){
         dl->var_name.push_back(var);
         dl->var_type.push_back(INTN);
@@ -626,7 +626,7 @@ bool MainWindow::exec_PATH(QStringList& list, int& cs, LayoutData *dl){
     list.removeAt(cs); cs--; //remove "PATH" keyword
     QString var = list.takeAt(cs); cs--; // var name.
     // putting this var name to data structure
-    int v_idx = dl->is_var_exist(dl, var);
+    int v_idx = dl->is_var_exist(var);
     if (-1 == v_idx ){
         dl->var_name.push_back(var);
         dl->var_type.push_back(PATH);
@@ -654,7 +654,7 @@ bool MainWindow::exec_STATE(QStringList& list, int& cs, LayoutData *dl){
     list.removeAt(cs); cs--; //remove "STATE" keyword
     QString var = list.takeAt(cs); cs--; // var name.
     // putting this var name to data structure
-    int v_idx = dl->is_var_exist(dl, var);
+    int v_idx = dl->is_var_exist(var);
     if (-1 == v_idx ){
         dl->var_name.push_back(var);
         dl->var_type.push_back(STATE);
@@ -684,7 +684,7 @@ bool MainWindow::exec_BUTTON(QStringList& list, int& cs, LayoutData *dl){
     // strip var name besause it can have inital state format like "button_name:0"
     QStringList var_pars = var.split(":");
     // putting this var name to data structure
-    int v_idx = dl->is_var_exist(dl, var_pars[0]);
+    int v_idx = dl->is_var_exist(var_pars[0]);
     if (-1 == v_idx ){
         dl->var_name.push_back(var_pars[0]);
         dl->var_type.push_back(BUTTON);
@@ -718,7 +718,7 @@ bool MainWindow::exec_GCODEVIEW(QStringList& list, int& cs, LayoutData *dl){
     // strip var name besause it can have inital state format like "button_name:0"
     QStringList var_pars = var.split(":");
     // putting this var name to data structure
-    int v_idx = dl->is_var_exist(dl, var_pars[0]);
+    int v_idx = dl->is_var_exist(var_pars[0]);
     if (-1 == v_idx ){
         dl->var_name.push_back(var_pars[0]);
         dl->var_type.push_back(GCODEVIEW);
@@ -750,7 +750,7 @@ bool MainWindow::exec_LAYOUT(QStringList& list, int& cs, LayoutData *dl){
     list.removeAt(cs); cs--; //remove "LAYOUT" keyword
     QString var = list.takeAt(cs); cs--; // var name.
     // putting this var name to data structure
-    int v_idx = dl->is_var_exist(dl, var);
+    int v_idx = dl->is_var_exist(var);
     if (-1 == v_idx ){
         dl->var_name.push_back(var);
         dl->var_type.push_back(LAYOUT);
@@ -781,7 +781,7 @@ bool MainWindow::exec_LAYOUT(QStringList& list, int& cs, LayoutData *dl){
 bool MainWindow::exec_STRI(QStringList& list, int& cs, LayoutData *dl){
     list.removeAt(cs); cs--; //remove "STRI" keyword
     QString var = list.takeAt(cs); cs--;
-    int v_idx = dl->is_var_exist(dl, var);
+    int v_idx = dl->is_var_exist(var);
     if (-1 == v_idx ){
         dl->var_name.push_back(var);
         dl->var_type.push_back(STRI);
@@ -810,7 +810,7 @@ bool MainWindow::exec_STRI(QStringList& list, int& cs, LayoutData *dl){
 bool MainWindow::exec_IVEC2(QStringList& list, int& cs, LayoutData *dl){
     list.removeAt(cs); cs--; //remove "IVEC" keyword
     QString var = list.takeAt(cs); cs--; //variable name
-    int v_idx = dl->is_var_exist(dl, var);
+    int v_idx = dl->is_var_exist(var);
     if (-1 == v_idx ){
         dl->var_name.push_back(var);
         dl->var_type.push_back(IVEC2);
@@ -841,7 +841,7 @@ float MainWindow::get_float_value(QStringList& list, int& cs, LayoutData *dl){
     float v = QString(sv).toFloat(&ok);
     if (ok == TRUE) return v;
     else {
-        int val_idx=dl->is_var_exist(dl, sv);
+        int val_idx=dl->is_var_exist(sv);
         if ( val_idx >= 0 ){ // have variable
             if (dl->var_type[val_idx] == DUBL){
                 //qDebug() << "got number" << ar->var_number[ar->val_index[val_idx]];
@@ -861,7 +861,7 @@ int MainWindow::get_int_value(QStringList& list, int& cs, LayoutData *dl){
     int v = QString(sv).toInt(&ok);
     if (ok == TRUE) return v;
     else {
-        int val_idx = dl->is_var_exist(dl, sv);
+        int val_idx = dl->is_var_exist(sv);
         if ( val_idx >= 0 ){ // have variable
             if (dl->var_type[val_idx] == INTN){
                 //qDebug() << "got number" << ar->var_number[ar->val_index[val_idx]];
@@ -888,7 +888,7 @@ int MainWindow::get_int_value_from_data(QString var){
     int res = -999999999; //very big negative number.
     //qDebug() << "ld =" << ld;
     if (ld != NULL){
-        int v_idx = ld->is_var_exist(ld, var);
+        int v_idx = ld->is_var_exist(var);
         //qDebug() << "v_idx =" << v_idx;
         if (-1 != v_idx ){
              res = ld->var_int_number[ld->val_index[v_idx]];
@@ -902,7 +902,7 @@ int MainWindow::get_int_value_from_data(QString var){
 
 QString MainWindow::get_stri_value_from_data(QString var){
     if (ld != NULL){
-        int v_idx = ld->is_var_exist(ld, var);
+        int v_idx = ld->is_var_exist(var);
         if (-1 != v_idx && (ld->var_type[v_idx] == STRI)){
              QString res = ld->var_string[ld->val_index[v_idx]];
              return res;
@@ -1031,13 +1031,9 @@ void MainWindow::check_connection(){
             // spindle status
             // feed
             // axii units
+
             ld->update_layout_elements(socket);
-            /*
-            qDebug() << "getting ";
-            QString line = "get joint_pos";
-            socket->write(line.toUtf8().constData());
-            socket->write("\r\n");
-            socket->flush();*/
+
         }
         //qDebug() << "Connected";
     }

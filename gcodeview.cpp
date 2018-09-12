@@ -15,7 +15,7 @@ GCodeView::GCodeView(QMainWindow* p, QStringList &sl, LayoutData *ld, int init_s
     if (elements.size() > 0) current_state = 0;
     if ( (init_state < elements.size()) && (init_state >= 0)) current_state = init_state;
 
-    g_list->addItem(QString("line 1"));
+    //g_list->addItem(QString("line 1"));
 
 }
 
@@ -55,16 +55,67 @@ void GCodeView::drawLayoutObject(QPainter& painter, QPoint &loffset){
             Path2D * pix = cs->get_Pix(ld_local, i);
             pix->drawPath(painter, pencolor, bgcolor, pt, sz, ucell, loffset );
         }*/
+
+        file_name = cs->get_file_name(ld_local);
+        qDebug() << "file name = " << file_name;
+        removeQuotes(file_name);
+        if (isFileNameChanged(file_name)){
+            g_list->clear();
+            program.clear();
+            if (!file_name.isEmpty()){
+                QFile file(file_name);
+                if (!file.open(QIODevice::ReadOnly)) {
+                    // set filename to empty
+                    file_name = "";
+                    old_file_name = "";
+                }
+                else {
+                    QTextStream in(&file);
+                    while(!in.atEnd()){
+                        QString tmp =  in.readLine();
+                        program.push_back(tmp);
+                    }
+                    file.close();
+                }
+            }
+        }
+
+        if (g_list->count() == 0) {
+            if(file_name.isEmpty()) g_list->addItem(QString("<no file>"));
+            else{
+                g_list->addItem( QString("(") + file_name + QString(")"));
+                // loading file if it's valid
+                if (program.size()>0){
+                    for(int i =0; i<program.size(); i++) g_list->addItem(program[i]);
+                }
+
+            }
+        }
         //draw list on top of this
         if (g_list != NULL){
             g_list->setGeometry( (pt->x()-1)*ucell+loffset.x(),  (pt->y()-1)*ucell + loffset.y(), sz->x()*ucell,sz->y()*ucell );
-            QFont gc_font("Monospace",20); // make font autoload to state
+            QString us = QString("font_size");
+            int fsize = ld_local->get_int_value_by_name(us);
+            QString ff = QString("font_family");
+            QString f_family = ld_local->get_string_value_by_name(ff);
+            QFont gc_font(f_family,fsize); // make font autoload to state
             g_list->setFont(gc_font);
             g_list->setVisible(TRUE);
+
         }
+    }
+    if (!(this->is_visible())){
+        g_list->setVisible(FALSE);
+
     }
 }
 
+void GCodeView::removeQuotes( QString & str){
+    if (str.size() >= 2) {
+        if ((str[str.size()-1] == QChar('\"')) || (str[str.size()-1] == QChar('\''))) str.remove(str.size()-1,1);
+        if ((str[0] == QChar('\"')) || (str[0] == QChar('\''))) str.remove(0,1);
+    }
+}
 bool GCodeView::isCursorOver(QPoint& pos){
     if (current_state < 0 ){
         qDebug() << "gcodeview has no states, fix ini file";
@@ -96,6 +147,13 @@ bool GCodeView::setState(int state){
     return false;
 }
 
+bool GCodeView::isFileNameChanged(QString new_file_name){
+    if (old_file_name.compare(new_file_name) == 0){
+        return FALSE;
+    }
+    old_file_name = new_file_name;
+    return TRUE;
+}
 // to define later
 void GCodeView::selectLayoutObject(){}
 void GCodeView::setLayoutObjectStatus(){}

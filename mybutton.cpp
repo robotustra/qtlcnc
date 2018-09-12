@@ -96,8 +96,8 @@ QString MyButton::get_active_state_command(){
             MyState* cs = ld_local->get_state_object_by_name( elements [current_state] );
             QString cmd = cs->get_command(ld_local);
             if (cmd.isEmpty()) return cmd; //before remove quotes from string verify the length of string!!!
-            cmd.remove(cmd.size()-1,1);
-            cmd.remove(0,1);
+            if ((cmd[cmd.size()-1] == QChar('\"')) || (cmd[cmd.size()-1] == QChar('\''))) cmd.remove(cmd.size()-1,1);
+            if ((cmd[0] == QChar('\"')) || (cmd[0] == QChar('\''))) cmd.remove(0,1);
             return cmd;
         }
         qDebug() << "current state is invalid for button";
