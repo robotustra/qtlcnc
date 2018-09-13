@@ -74,7 +74,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
         ui->statusBar->showMessage( "x="+ QString::number( event->x()) + " | y=" +QString::number( event->y()) );
     }
     if (!cmd.isEmpty()) {
-        ld->processCommand(cmd);
+        ld->processCommand(cmd, socket);
         update();
     }
 }
@@ -1083,6 +1083,6 @@ void MainWindow::parseData(QString rLine){
     // units
     // file name
     // state of machine, on/off, auto, manual, mdi
-    ld->parseReply(rLine);
+    ld->parseReply(rLine, socket);
     update();
 }

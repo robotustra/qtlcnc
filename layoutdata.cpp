@@ -298,7 +298,7 @@ Path2D * LayoutData::get_path_value_by_name(QString &str_name){
 *   This function receive the command from layout element and can modify any state of the window.
 *   It can send the messages to linuxcnc system (later).
 */
-void LayoutData::processCommand(QString & cmd){
+void LayoutData::processCommand(QString & cmd, QTcpSocket *socket){
     /*
         Command consisnt of name of variables in the layout data and can modify it.
         For button the number means the state.
@@ -377,6 +377,9 @@ void LayoutData::processCommand(QString & cmd){
 
                         if (!fileName.isEmpty()) {
                             set_string_value_by_name(obj_name, fileName);
+                            QString lcnc_cmd_open = QString("set open ") + fileName;
+                            qDebug() << "loading file" << lcnc_cmd_open;
+                            send_command_direct(socket, lcnc_cmd_open);
                         }
                     }
                 }
@@ -408,7 +411,13 @@ void LayoutData::send_update_layout_elements(QTcpSocket * socket){
     }
 }
 
-void LayoutData::parseReply(QString rLine){
+void LayoutData::send_command_direct(QTcpSocket * socket, QString upd_cmd){
+    socket->write(upd_cmd.toUtf8().constData());
+    socket->write("\r\n");
+    socket->flush();
+}
+
+void LayoutData::parseReply(QString rLine, QTcpSocket * socket){
     // update indicators, feedrate, button states, spindle encoder, file line, opened file
     // joints
     // units
@@ -487,7 +496,7 @@ void LayoutData::parseReply(QString rLine){
                                         QString cmd0= get_string_value_by_name(val_param);
                                         removeQuotes(cmd0);
                                         qDebug() << cmd0;
-                                        processCommand(cmd0);
+                                        processCommand(cmd0, socket);
                                         break;
                                     }
                                 }
