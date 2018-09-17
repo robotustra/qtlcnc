@@ -60,7 +60,7 @@
 	2) Gcodeview loads the code. Load of the code should trigger interpreter to process g-code.
 	3) rs274ngc should be implemented to display trajectory in space.
 	4) GL viewer should be implemented to display the position of the cutter, stock, chuck (for lathe), vise etc.
-	5) 
+	5) Tool viewer should be able to display position of the tool as well as the geometry.
 
 
 
