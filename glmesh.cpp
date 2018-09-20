@@ -1,5 +1,6 @@
 #include "glmesh.h"
 #include "mesh.h"
+#include <stdint.h>
 
 GLMesh::GLMesh(const Mesh* const mesh)
     : vertices(QGLBuffer::VertexBuffer), indices(QGLBuffer::IndexBuffer)

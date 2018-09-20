@@ -63,7 +63,43 @@
 	5) Tool viewer should be able to display position of the tool as well as the geometry.
 
 
+[18.09.2018]
+Usage: rs274 [-p interp.so] [-t tool.tbl] [-v var-file.var] [-n 0|1|2]
+          [-b] [-s] [-g] [input file [output file]]
+
+    -p: Specify the pluggable interpreter to use
+    -t: Specify the .tbl (tool table) file to use
+    -v: Specify the .var (parameter) file to use
+    -n: Specify the continue mode:
+           0: continue
+           1: enter MDI mode
+           2: stop (default)
+    -b: Toggle the 'block delete' flag (default: OFF)
+    -s: Toggle the 'print stack' flag (default: OFF)
+    -g: Toggle the 'go (batch mode)' flag (default: OFF)
+    -i: specify the .ini file (default: no ini file)
+    -T: call task_init()
+    -l: specify the log_level (default: -1)
+ 
 
 
+To get the path coordinates the next steps should be taken.
+	
+	1) Use rs274 interpreter and spell the output into the output file.
+	2) Parse output file and get all cooordinates in a 3D space.
+	3) Send signal to glView to update/load trajectrory/tool
 
+For convinience I should create a visualisation of the tool.
+Also I have to draw simple machine, spindle, vise, stock.
 
+	Tool table should be described in the UI file.
+	"tools.tbl" my_tool_table STRI
+	"machine_body.stl" machine_body STL
+	"machine_chuck.stl" chuck STL
+	"tool1.stl" ...
+
+	Machine drawing and interpretation could be a separate file, but the state of the machine should be controlled by 
+	variables set in gui file. For instance the tool offsets and so on.
+
+	"vise.stl" vise STL
+	"stock.stl" stock STL
