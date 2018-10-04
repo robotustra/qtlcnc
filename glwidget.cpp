@@ -47,20 +47,17 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-#if QT_VERSION <= 0x040802
-#define QT_VERSION_48 1
-#else
-#define QT_VERSION_48 0
-#endif
 
 #include "glwidget.h"
 #include <QMouseEvent>
+
 #if (QT_VERSION_48)
 #include <QtOpenGL/QGLShaderProgram>
 #include <QtOpenGL/QGLContext>
 #else
 #include <QOpenGLShaderProgram>
 #endif
+
 #include <QCoreApplication>
 #include <math.h>
 
@@ -360,27 +357,28 @@ void GLWidget::paintGL()
 
     m_world.setToIdentity();   
     m_world.translate(0.5,0.5,-1.0); // translation and rotation order does matter!
+    /*
     m_world.rotate(180.0f - (m_xRot / 16.0f), 1, 0, 0);
     m_world.rotate(m_yRot / 16.0f, 0, 1, 0);
     m_world.rotate(m_zRot / 16.0f, 0, 0, 1);
-
+    */
 
     // we can rotate and translate camera around the worlds (objects in the world)
-    /*
+
     m_camera.setToIdentity();
     m_camera.translate(0, 0, -1);
     m_camera.rotate(180.0f - (m_xRot / 16.0f), 1, 0, 0);
     m_camera.rotate(m_yRot / 16.0f, 0, 1, 0);
     m_camera.rotate(m_zRot / 16.0f, 0, 0, 1);
-    */
+
     // It's possible to move objects in the own world
     m_world1.setToIdentity();
     m_world1.translate(-0.2,-0.2,-0.3); // translation and rotation order does matter!
-
+    /*
     m_world1.rotate(180.0f + (m_xRot / 16.0f), 1, 0, 0);
     m_world1.rotate(-m_yRot / 16.0f, 0, 1, 0);
     m_world1.rotate(m_zRot / 16.0f, 0, 0, 1);
-
+    */
 #if (QT_VERSION_48)
 #else
     QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao); // not clear what is it for?

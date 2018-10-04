@@ -51,7 +51,7 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
-#if QT_VERSION <= 0x040802
+#if QT_VERSION < 0x050000
 #define QT_VERSION_48 1
 #else
 #define QT_VERSION_48 0
@@ -75,6 +75,12 @@
 
 #include <QMatrix4x4>
 #include "model.h"
+
+#if QT_VERSION <= 0x050000
+#define QT_VERSION_48 1
+#else
+#define QT_VERSION_48 0
+#endif
 
 #if (QT_VERSION_48)
 QT_FORWARD_DECLARE_CLASS(QGLShaderProgram)
@@ -136,6 +142,7 @@ private:
     QOpenGLVertexArrayObject m_vao;
     QOpenGLBuffer m_logoVbo;
     QOpenGLShaderProgram *m_program;
+    QOpenGLShaderProgram *m_program1;
 #endif
     int m_projMatrixLoc;
     int m_mvMatrixLoc;

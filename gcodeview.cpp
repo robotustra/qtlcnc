@@ -3,6 +3,13 @@
 #include <QPoint>
 #include <QDebug>
 
+#ifndef TRUE
+#define TRUE true
+#endif
+#ifndef FALSE
+#define FALSE false
+#endif
+
 GCodeView::GCodeView(QMainWindow* p, QStringList &sl, LayoutData *ld, int init_state)
 {
     parent = p;

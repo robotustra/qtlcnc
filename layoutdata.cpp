@@ -4,6 +4,13 @@
 #include "mybutton.h"
 #include <QFileDialog>
 
+#ifndef TRUE
+#define TRUE true
+#endif
+#ifndef FALSE
+#define FALSE false
+#endif
+
 LayoutData::LayoutData(QString filename)
 {
     is_parsing = false;

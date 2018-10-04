@@ -2,13 +2,6 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#if QT_VERSION <= 0x040802
-#define QT_VERSION_48 1
-#else
-#define QT_VERSION_48 0
-#endif
-
-
 #if (QT_VERSION_48)
 #include <QtOpenGL>
 #else
