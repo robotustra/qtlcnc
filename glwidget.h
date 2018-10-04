@@ -108,6 +108,11 @@ private:
     int m_mvMatrixLoc;
     int m_normalMatrixLoc;
     int m_lightPosLoc;
+    QOpenGLShaderProgram *m_program1; //experimental program
+    int m_projMatrixLoc1;
+    int m_mvMatrixLoc1;
+    int m_normalMatrixLoc1;
+    int m_lightPosLoc1;
     QMatrix4x4 m_proj;
     QMatrix4x4 m_camera;
     QMatrix4x4 m_world;

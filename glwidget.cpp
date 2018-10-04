@@ -196,12 +196,12 @@ static const char *fragmentShaderSource =
 static const char *my_fragmentShaderSource =
     "varying highp vec3 vert;\n"
     "varying highp vec3 vertNormal;\n"
-    "uniform highp vec3 lightPos;\n"
+    "uniform highp vec3 lightPos1;\n"
     "void main() {\n"
-    "   highp vec3 L = normalize(lightPos - vert);\n"
+    "   highp vec3 L = normalize(lightPos1 - vert);\n"
     "   highp float NL = max(dot(normalize(vertNormal), L), 0.0);\n"
-    "   highp vec3 color = vec3(0.5, 0.0, 1.0);\n"
-    "   highp vec3 col = clamp(color * 0.2 + color * 0.8 * NL, 0.1, 0.5);\n"
+    "   highp vec3 color = vec3(0.5, 0.5, 1.0);\n"
+    "   highp vec3 col = clamp(color * 0.2 + color * 0.8 * NL, 0.1, 0.9);\n"
     "   gl_FragColor = vec4(col, 1.0);\n"
     "}\n";
 
@@ -234,6 +234,22 @@ void GLWidget::initializeGL()
     m_normalMatrixLoc = m_program->uniformLocation("normalMatrix");
     m_lightPosLoc = m_program->uniformLocation("lightPos");
 
+    //another ptogram for shaders to display other solid with other colors
+    m_program1 = new QOpenGLShaderProgram;
+    m_program1->addShaderFromSourceCode(QOpenGLShader::Vertex, m_core ? vertexShaderSourceCore : vertexShaderSource);
+    m_program1->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource);
+    //m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, my_fragmentShaderSource);
+    m_program1->bindAttributeLocation("vertex", 0);
+    m_program1->bindAttributeLocation("normal", 1);
+    m_program1->link();
+
+    m_program1->bind();
+    m_projMatrixLoc1 = m_program->uniformLocation("projMatrix");
+    m_mvMatrixLoc1 = m_program->uniformLocation("mvMatrix");
+    m_normalMatrixLoc1 = m_program->uniformLocation("normalMatrix");
+    m_lightPosLoc1 = m_program->uniformLocation("lightPos1");
+
+
     // Create a vertex array object. In OpenGL ES 2.0 and OpenGL 2.x
     // implementations this is optional and support may not be present
     // at all. Nonetheless the below code works in all cases and makes
@@ -254,9 +270,12 @@ void GLWidget::initializeGL()
     m_camera.translate(0, 0, -1);
 
     // Light position is fixed.
-    m_program->setUniformValue(m_lightPosLoc, QVector3D(0, 0, 70));
+    m_program->setUniformValue(m_lightPosLoc, QVector3D(0, 50, 70));
+    m_program1->setUniformValue(m_lightPosLoc1, QVector3D(0, 0, 70));
 
     m_program->release();
+    m_program1->release();
+
 }
 
 void GLWidget::setupVertexAttribs()
@@ -276,20 +295,30 @@ void GLWidget::paintGL()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    m_world.setToIdentity();
-    m_world.translate(0.0,0.0,-1.0); // translation and rotation order does matter!
-    m_world.rotate(180.0f - (m_xRot / 16.0f), 1, 0, 0);
+    m_world.setToIdentity();   
+    m_world.translate(0.5,0.5,-1.0); // translation and rotation order does matter!
+    /*m_world.rotate(180.0f - (m_xRot / 16.0f), 1, 0, 0);
     m_world.rotate(m_yRot / 16.0f, 0, 1, 0);
     m_world.rotate(m_zRot / 16.0f, 0, 0, 1);
+    */
 
+    // we can rotate and translate camera around the worlds (objects in the world)
+    m_camera.setToIdentity();
+    m_camera.translate(0, 0, -1);
+    m_camera.rotate(180.0f - (m_xRot / 16.0f), 1, 0, 0);
+    m_camera.rotate(m_yRot / 16.0f, 0, 1, 0);
+    m_camera.rotate(m_zRot / 16.0f, 0, 0, 1);
+
+    // It's possible to move objects in the own world
     m_world1.setToIdentity();
-    //m_world1.translate(0.0,0.0,-1.0); // translation and rotation order does matter!
+    m_world1.translate(-0.2,-0.2,-0.3); // translation and rotation order does matter!
+    /*
     m_world1.rotate(180.0f + (m_xRot / 16.0f), 1, 0, 0);
-    m_world1.rotate(m_yRot / 16.0f, 0, 1, 0);
+    m_world1.rotate(-m_yRot / 16.0f, 0, 1, 0);
     m_world1.rotate(m_zRot / 16.0f, 0, 0, 1);
+    */
 
-
-    QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao);
+    QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao); // not clear what is it for?
     m_program->bind();
     m_program->setUniformValue(m_projMatrixLoc, m_proj);
     m_program->setUniformValue(m_mvMatrixLoc, m_camera * m_world);
@@ -300,17 +329,18 @@ void GLWidget::paintGL()
 
     m_program->release();
 
-    // another array
+    // draw the same model but with different shader program
     QOpenGLVertexArrayObject::Binder vaoBinder1(&m_vao);
-    m_program->bind();
-    m_program->setUniformValue(m_projMatrixLoc, m_proj);
-    m_program->setUniformValue(m_mvMatrixLoc, m_camera * m_world1);
+    m_program1->bind();
+    m_program1->setUniformValue(m_projMatrixLoc1, m_proj);
+    m_program1->setUniformValue(m_mvMatrixLoc1, m_camera * m_world1);
     QMatrix3x3 normalMatrix1 = m_world1.normalMatrix();
-    m_program->setUniformValue(m_normalMatrixLoc, normalMatrix1);
+    m_program->setUniformValue(m_normalMatrixLoc1, normalMatrix1);
 
     glDrawArrays(GL_TRIANGLES, 0, m_logo.vertexCount());
 
-    m_program->release();
+    m_program1->release();
+
 }
 
 void GLWidget::resizeGL(int w, int h)
