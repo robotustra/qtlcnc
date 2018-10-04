@@ -181,6 +181,21 @@ static const char *vertexShaderSource =
     "   gl_Position = projMatrix * mvMatrix * vertex;\n"
     "}\n";
 
+static const char *my_vertexShaderSource =
+    "attribute vec4 vertex;\n"
+    "attribute vec3 normal;\n"
+    "varying vec3 vert;\n"
+    "varying vec3 vertNormal;\n"
+    "uniform mat4 projMatrix1;\n"
+    "uniform mat4 mvMatrix1;\n"
+    "uniform mat3 normalMatrix1;\n"
+    "void main() {\n"
+    "   vert = vertex.xyz;\n"
+    "   vertNormal = normalMatrix1 * normal;\n"
+    "   gl_Position = projMatrix1 * mvMatrix1 * vertex;\n"
+    "}\n";
+
+
 static const char *fragmentShaderSource =
     "varying highp vec3 vert;\n"
     "varying highp vec3 vertNormal;\n"
@@ -222,8 +237,8 @@ void GLWidget::initializeGL()
 
     m_program = new QOpenGLShaderProgram;
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, m_core ? vertexShaderSourceCore : vertexShaderSource);
-    //m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, m_core ? fragmentShaderSourceCore : fragmentShaderSource);
-    m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, my_fragmentShaderSource);
+    m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, m_core ? fragmentShaderSourceCore : fragmentShaderSource);
+    //m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, my_fragmentShaderSource);
     m_program->bindAttributeLocation("vertex", 0);
     m_program->bindAttributeLocation("normal", 1);
     m_program->link();
@@ -236,18 +251,20 @@ void GLWidget::initializeGL()
 
     //another ptogram for shaders to display other solid with other colors
     m_program1 = new QOpenGLShaderProgram;
-    m_program1->addShaderFromSourceCode(QOpenGLShader::Vertex, m_core ? vertexShaderSourceCore : vertexShaderSource);
-    m_program1->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource);
+    m_program1->addShaderFromSourceCode(QOpenGLShader::Vertex, my_vertexShaderSource);
+    m_program1->addShaderFromSourceCode(QOpenGLShader::Fragment, my_fragmentShaderSource);
+
     //m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, my_fragmentShaderSource);
     m_program1->bindAttributeLocation("vertex", 0);
     m_program1->bindAttributeLocation("normal", 1);
     m_program1->link();
 
+    // get the parameters indexii which are used inside shaders
     m_program1->bind();
-    m_projMatrixLoc1 = m_program->uniformLocation("projMatrix");
-    m_mvMatrixLoc1 = m_program->uniformLocation("mvMatrix");
-    m_normalMatrixLoc1 = m_program->uniformLocation("normalMatrix");
-    m_lightPosLoc1 = m_program->uniformLocation("lightPos1");
+    m_projMatrixLoc1 = m_program1->uniformLocation("projMatrix1");
+    m_mvMatrixLoc1 = m_program1->uniformLocation("mvMatrix1");
+    m_normalMatrixLoc1 = m_program1->uniformLocation("normalMatrix1");
+    m_lightPosLoc1 = m_program1->uniformLocation("lightPos1");
 
 
     // Create a vertex array object. In OpenGL ES 2.0 and OpenGL 2.x
@@ -270,7 +287,7 @@ void GLWidget::initializeGL()
     m_camera.translate(0, 0, -1);
 
     // Light position is fixed.
-    m_program->setUniformValue(m_lightPosLoc, QVector3D(0, 50, 70));
+    m_program->setUniformValue(m_lightPosLoc, QVector3D(0, 0, 70));
     m_program1->setUniformValue(m_lightPosLoc1, QVector3D(0, 0, 70));
 
     m_program->release();
@@ -297,26 +314,27 @@ void GLWidget::paintGL()
 
     m_world.setToIdentity();   
     m_world.translate(0.5,0.5,-1.0); // translation and rotation order does matter!
-    /*m_world.rotate(180.0f - (m_xRot / 16.0f), 1, 0, 0);
+    m_world.rotate(180.0f - (m_xRot / 16.0f), 1, 0, 0);
     m_world.rotate(m_yRot / 16.0f, 0, 1, 0);
     m_world.rotate(m_zRot / 16.0f, 0, 0, 1);
-    */
+
 
     // we can rotate and translate camera around the worlds (objects in the world)
+    /*
     m_camera.setToIdentity();
     m_camera.translate(0, 0, -1);
     m_camera.rotate(180.0f - (m_xRot / 16.0f), 1, 0, 0);
     m_camera.rotate(m_yRot / 16.0f, 0, 1, 0);
     m_camera.rotate(m_zRot / 16.0f, 0, 0, 1);
-
+    */
     // It's possible to move objects in the own world
     m_world1.setToIdentity();
     m_world1.translate(-0.2,-0.2,-0.3); // translation and rotation order does matter!
-    /*
+
     m_world1.rotate(180.0f + (m_xRot / 16.0f), 1, 0, 0);
     m_world1.rotate(-m_yRot / 16.0f, 0, 1, 0);
     m_world1.rotate(m_zRot / 16.0f, 0, 0, 1);
-    */
+
 
     QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao); // not clear what is it for?
     m_program->bind();
@@ -335,7 +353,7 @@ void GLWidget::paintGL()
     m_program1->setUniformValue(m_projMatrixLoc1, m_proj);
     m_program1->setUniformValue(m_mvMatrixLoc1, m_camera * m_world1);
     QMatrix3x3 normalMatrix1 = m_world1.normalMatrix();
-    m_program->setUniformValue(m_normalMatrixLoc1, normalMatrix1);
+    m_program1->setUniformValue(m_normalMatrixLoc1, normalMatrix1);
 
     glDrawArrays(GL_TRIANGLES, 0, m_logo.vertexCount());
 
