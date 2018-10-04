@@ -47,17 +47,31 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+#if QT_VERSION <= 0x040802
+#define QT_VERSION_48 1
+#else
+#define QT_VERSION_48 0
+#endif
 
 #include "glwidget.h"
 #include <QMouseEvent>
+#if (QT_VERSION_48)
+#include <QtOpenGL/QGLShaderProgram>
+#include <QtOpenGL/QGLContext>
+#else
 #include <QOpenGLShaderProgram>
+#endif
 #include <QCoreApplication>
 #include <math.h>
 
 bool GLWidget::m_transparent = false;
 
 GLWidget::GLWidget(QWidget *parent)
+#if (QT_VERSION_48)
+    : QGLWidget(parent),
+#else
     : QOpenGLWidget(parent),
+#endif
       m_xRot(0),
       m_yRot(0),
       m_zRot(0),
@@ -67,11 +81,11 @@ GLWidget::GLWidget(QWidget *parent)
     m_core = true;
     // --transparent causes the clear color to be transparent. Therefore, on systems that
     // support it, the widget will become transparent apart from the logo.
-    if (m_transparent) {
+    /*if (m_transparent) {
         QSurfaceFormat fmt = format();
         fmt.setAlphaBufferSize(8);
         setFormat(fmt);
-    }
+    }*/
 }
 
 GLWidget::~GLWidget()
@@ -129,7 +143,7 @@ void GLWidget::setZRotation(int angle)
 
 void GLWidget::cleanup()
 {
-    if (m_program == nullptr)
+    if (m_program == NULL)
         return;
     makeCurrent();
     m_logoVbo.destroy();
@@ -230,14 +244,30 @@ void GLWidget::initializeGL()
     // aboutToBeDestroyed() signal, instead of the destructor. The emission of
     // the signal will be followed by an invocation of initializeGL() where we
     // can recreate all resources.
+#if (QT_VERSION_48)
+//    connect(context(), &QtOpenGLModule::aboutToBeDestroyed, this, &GLWidget::cleanup);
+#else
     connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &GLWidget::cleanup);
+#endif
 
+
+#if (QT_VERSION_48)
+    initializeGLFunctions();
+#else
     initializeOpenGLFunctions();
-    glClearColor(0.25, 0.5, 0, m_transparent ? 0 : 1);
+#endif
 
+
+    glClearColor(0.25, 0.5, 0, m_transparent ? 0 : 1);
+#if (QT_VERSION_48)
+    m_program = new QGLShaderProgram;
+    m_program->addShaderFromSourceCode(QGLShader::Vertex, m_core ? vertexShaderSourceCore : vertexShaderSource);
+    m_program->addShaderFromSourceCode(QGLShader::Fragment, m_core ? fragmentShaderSourceCore : fragmentShaderSource);
+#else
     m_program = new QOpenGLShaderProgram;
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, m_core ? vertexShaderSourceCore : vertexShaderSource);
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, m_core ? fragmentShaderSourceCore : fragmentShaderSource);
+#endif
     //m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, my_fragmentShaderSource);
     m_program->bindAttributeLocation("vertex", 0);
     m_program->bindAttributeLocation("normal", 1);
@@ -250,9 +280,15 @@ void GLWidget::initializeGL()
     m_lightPosLoc = m_program->uniformLocation("lightPos");
 
     //another ptogram for shaders to display other solid with other colors
+#if (QT_VERSION_48)
+    m_program1 = new QGLShaderProgram;
+    m_program1->addShaderFromSourceCode(QGLShader::Vertex, my_vertexShaderSource);
+    m_program1->addShaderFromSourceCode(QGLShader::Fragment, my_fragmentShaderSource);
+#else
     m_program1 = new QOpenGLShaderProgram;
     m_program1->addShaderFromSourceCode(QOpenGLShader::Vertex, my_vertexShaderSource);
     m_program1->addShaderFromSourceCode(QOpenGLShader::Fragment, my_fragmentShaderSource);
+#endif
 
     //m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, my_fragmentShaderSource);
     m_program1->bindAttributeLocation("vertex", 0);
@@ -271,9 +307,11 @@ void GLWidget::initializeGL()
     // implementations this is optional and support may not be present
     // at all. Nonetheless the below code works in all cases and makes
     // sure there is a VAO when one is needed.
+#if (QT_VERSION_48)
+#else
     m_vao.create();
     QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao);
-
+#endif
     // Setup our vertex buffer object.
     m_logoVbo.create();
     m_logoVbo.bind();
@@ -298,11 +336,19 @@ void GLWidget::initializeGL()
 void GLWidget::setupVertexAttribs()
 {
     m_logoVbo.bind();
+#if (QT_VERSION_48)
+    //QGLFunctions *f = QGLContext::functions();
+    QGLFunctions::glEnableVertexAttribArray(0);
+    QGLFunctions::glEnableVertexAttribArray(1);
+    QGLFunctions::glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+    QGLFunctions::glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
+#else
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     f->glEnableVertexAttribArray(0);
     f->glEnableVertexAttribArray(1);
     f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
     f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
+#endif
     m_logoVbo.release();
 }
 
@@ -335,8 +381,10 @@ void GLWidget::paintGL()
     m_world1.rotate(-m_yRot / 16.0f, 0, 1, 0);
     m_world1.rotate(m_zRot / 16.0f, 0, 0, 1);
 
-
+#if (QT_VERSION_48)
+#else
     QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao); // not clear what is it for?
+#endif
     m_program->bind();
     m_program->setUniformValue(m_projMatrixLoc, m_proj);
     m_program->setUniformValue(m_mvMatrixLoc, m_camera * m_world);
@@ -348,7 +396,10 @@ void GLWidget::paintGL()
     m_program->release();
 
     // draw the same model but with different shader program
+#if (QT_VERSION_48)
+#else
     QOpenGLVertexArrayObject::Binder vaoBinder1(&m_vao);
+#endif
     m_program1->bind();
     m_program1->setUniformValue(m_projMatrixLoc1, m_proj);
     m_program1->setUniformValue(m_mvMatrixLoc1, m_camera * m_world1);

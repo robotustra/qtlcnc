@@ -51,16 +51,42 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
+#if QT_VERSION <= 0x040802
+#define QT_VERSION_48 1
+#else
+#define QT_VERSION_48 0
+#endif
+
+
+#if (QT_VERSION_48)
+#include <QGLWidget>
+#include <QGLFunctions>
+//#include <QGLVertexArrayObject>
+#include <QtOpenGL/QGLBuffer>
+#include <QtOpenGL/QGLWidget>
+#include <QtOpenGL>
+#include <QtOpenGL/QGLShaderProgram>
+#else
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLBuffer>
+#endif
+
 #include <QMatrix4x4>
 #include "model.h"
 
+#if (QT_VERSION_48)
+QT_FORWARD_DECLARE_CLASS(QGLShaderProgram)
+#else
 QT_FORWARD_DECLARE_CLASS(QOpenGLShaderProgram)
+#endif
 
+#if (QT_VERSION_48)
+class GLWidget : public QGLWidget, protected QGLFunctions
+#else
 class GLWidget : public QOpenGLWidget, protected QOpenGLFunctions
+#endif
 {
     Q_OBJECT
 
@@ -101,14 +127,20 @@ private:
     int m_zRot;
     QPoint m_lastPos;
     Model m_logo;
+#if (QT_VERSION_48)
+    //QGLVertexArrayObject m_vao;
+    QGLBuffer m_logoVbo;
+    QGLShaderProgram *m_program;
+    QGLShaderProgram *m_program1;
+#else
     QOpenGLVertexArrayObject m_vao;
     QOpenGLBuffer m_logoVbo;
     QOpenGLShaderProgram *m_program;
+#endif
     int m_projMatrixLoc;
     int m_mvMatrixLoc;
     int m_normalMatrixLoc;
     int m_lightPosLoc;
-    QOpenGLShaderProgram *m_program1; //experimental program
     int m_projMatrixLoc1;
     int m_mvMatrixLoc1;
     int m_normalMatrixLoc1;
