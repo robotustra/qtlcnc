@@ -26,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent) :
     init_enable = FALSE;
     have_data_to_send = FALSE;
     attempt_cnt = 0;
+    pcwt = ui->cwt;
 }
 
 MainWindow::~MainWindow()

@@ -83,7 +83,7 @@ void LayoutData::draw_layout(QPainter &painter, QPoint& loffset){
                     }
                     if (t == GLVIEW){
                         MyGLView * cv = (MyGLView*) lo;
-                        cv->setVisible(FALSE);
+                        //cv->setVisible(FALSE);
                         cv->drawLayoutObject(painter, loffset);
                     }
                 }
@@ -120,7 +120,7 @@ void LayoutData::draw_layout(QPainter &painter, QPoint& loffset){
         }
         if (t == GLVIEW){
             MyGLView * cv = (MyGLView*) lo;
-            cv->setVisible(TRUE);
+            //cv->setVisible(TRUE); // don't know yet how to manage visibility of the glview?
             cv->drawLayoutObject(painter, loffset);
         }
     }

@@ -52,6 +52,7 @@ public:
     void parseData(QString rLine);
 
     ~MainWindow();
+    QWidget * pcwt;
 
 
 private slots:

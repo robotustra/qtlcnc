@@ -1,6 +1,7 @@
 #include "myglview.h"
 #include "glwidget.h"
 #include "state.h"
+#include "mainwindow.h"
 #include <QPoint>
 #include <QDebug>
 #include <QSlider>
@@ -12,7 +13,7 @@
 #include <QApplication>
 #include <QMessageBox>
 
-MyGLView::MyGLView(QMainWindow* p, QStringList &sl, LayoutData *ld, int init_state)
+MyGLView::MyGLView(MainWindow* p, QStringList &sl, LayoutData *ld, int init_state)
 {
     parent = p;
     //g_list = new QListWidget(p);
@@ -26,43 +27,20 @@ MyGLView::MyGLView(QMainWindow* p, QStringList &sl, LayoutData *ld, int init_sta
 
     //g_list->addItem(QString("line 1"));
 
-    glWidget = new GLWidget;
+    glWidget = new GLWidget(parent);
 
-    xSlider = createSlider();
-    ySlider = createSlider();
-    zSlider = createSlider();
-
-    //connect(xSlider, &QSlider::valueChanged, glWidget, &GLWidget::setXRotation);
-    //connect(glWidget, &GLWidget::xRotationChanged, xSlider, &QSlider::setValue);
-    //connect(ySlider, &QSlider::valueChanged, glWidget, &GLWidget::setYRotation);
-    //connect(glWidget, &GLWidget::yRotationChanged, ySlider, &QSlider::setValue);
-    //connect(zSlider, &QSlider::valueChanged, glWidget, &GLWidget::setZRotation);
-    //connect(glWidget, &GLWidget::zRotationChanged, zSlider, &QSlider::setValue);
-
-    QVBoxLayout *mainLayout = new QVBoxLayout;
     QHBoxLayout *container = new QHBoxLayout;
+    container->setContentsMargins(0,0,0,0); // remove border around glview
     container->addWidget(glWidget);
-    container->addWidget(xSlider);
-    container->addWidget(ySlider);
-    container->addWidget(zSlider);
-
-    QWidget *w = new QWidget;
-    w->setLayout(container);
-    mainLayout->addWidget(w);
-    //dockBtn = new QPushButton(tr("Undock"), this);
-    //connect(dockBtn, &QPushButton::clicked, this, &Window::dockUndock);
-    //mainLayout->addWidget(dockBtn);
-
-    setLayout(mainLayout);
-
-    xSlider->setValue(15 * 16);
-    ySlider->setValue(345 * 16);
-    zSlider->setValue(0 * 16);
+    p->pcwt->setLayout(container);
+    p->setCentralWidget(p->pcwt);
 
 }
 
 MyGLView::~MyGLView(){
     if (g_list != NULL) delete g_list;
+    if (glWidget != NULL) delete glWidget;
+
 }
 
 QSlider* MyGLView::createSlider()
@@ -96,6 +74,15 @@ void MyGLView::drawLayoutObject(QPainter& painter, QPoint &loffset){
         QString us = QString("ucell");
         int ucell = ld_local->get_int_value_by_name(us);
         //qDebug() << "ucell= " << ucell;
+        float x0 = (pt->x()-1) * ucell + loffset.x();
+        float y0 = (pt->y()-1) * ucell + loffset.y();
+        float sx = sz->x() * ucell;
+        float sy = sz->y() * ucell;
+
+        // set geometry of the glview
+        if (parent != NULL && parent->pcwt != NULL ){
+            parent->pcwt->setGeometry(x0,y0,sx,sy); // to set position I break layout of the main window
+        }
 
         /*
         //loop over all pathes
