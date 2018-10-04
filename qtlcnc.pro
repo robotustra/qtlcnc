@@ -27,7 +27,9 @@ SOURCES += main.cpp\
     layoutobject.cpp \
     myglview.cpp \
     gcodeview.cpp \
-    gcodeedit.cpp
+    gcodeedit.cpp \
+    glwidget.cpp \
+    model.cpp
 
 HEADERS  += mainwindow.h \
     layoutdata.h \
@@ -43,7 +45,9 @@ HEADERS  += mainwindow.h \
     layoutobject.h \
     myglview.h \
     gcodeview.h \
-    gcodeedit.h
+    gcodeedit.h \
+    glwidget.h \
+    model.h
 
 FORMS    += mainwindow.ui
 

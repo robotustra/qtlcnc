@@ -355,6 +355,7 @@ std::string key_words[] = {
         "STATE",
         "BUTTON",
         "GCODEVIEW",
+        "GLVIEW",
         "LAYOUT"
 
     };
@@ -571,6 +572,10 @@ bool MainWindow::exec_word(QStringList& list, int& cs, LayoutData *ld){
         qDebug() << "GCODEVIEW found";
         ok = exec_GCODEVIEW(list, cs, ld);
     }
+    if(QString::compare( ts, "GLVIEW", Qt::CaseInsensitive) == 0){ // glview object
+        qDebug() << "GLVIEW found";
+        ok = exec_GLVIEW(list, cs, ld);
+    }
     if(QString::compare( ts, "LAYOUT", Qt::CaseInsensitive) == 0){ // layout object
         qDebug() << "LAYOUT found";
         ok = exec_LAYOUT(list, cs, ld);
@@ -744,6 +749,37 @@ bool MainWindow::exec_GCODEVIEW(QStringList& list, int& cs, LayoutData *dl){
     return TRUE;
 }
 
+bool MainWindow::exec_GLVIEW(QStringList& list, int& cs, LayoutData *dl){
+    list.removeAt(cs); cs--; //remove "GLVIEW" keyword
+    QString var = list.takeAt(cs); cs--; // var name.
+    // strip var name besause it can have inital state format like "button_name:0"
+    QStringList var_pars = var.split(":");
+    // putting this var name to data structure
+    int v_idx = dl->is_var_exist(var_pars[0]);
+    if (-1 == v_idx ){
+        dl->var_name.push_back(var_pars[0]);
+        dl->var_type.push_back(GLVIEW);
+    }else{
+        if (!is_updating) {
+            qDebug() << "glview " << var << " exists, fix input file.";
+            return FALSE;
+        }else{
+            // just update the value in layout
+            int init_state = -1;
+            if (var_pars.size() > 1) init_state = var_pars[1].toInt();
+            MyGLView * ps = get_glview_value(list, cs, dl, init_state);
+            dl->var_glview[dl->val_index[v_idx]] = ps;
+            return TRUE;
+        }
+    }
+    int init_state = -1;
+    if (var_pars.size() > 1) init_state = var_pars[1].toInt();
+    MyGLView * pa = get_glview_value(list, cs, dl,init_state);
+    dl->val_index.push_back(dl->var_glview.size());
+    dl->var_glview.push_back(pa);
+    dl->var_number_modified_flag.push_back(false); // new layout
+    return TRUE;
+}
 
 
 bool MainWindow::exec_LAYOUT(QStringList& list, int& cs, LayoutData *dl){
@@ -943,6 +979,13 @@ GCodeView* MainWindow::get_gcodeview_value(QStringList& list, int& cs, LayoutDat
     cs = cs; //not used yet
     // no verification yet.
     return new GCodeView(this, list, dl, init_state);
+}
+
+// Getting strings parameters and prepare constructor State
+MyGLView* MainWindow::get_glview_value(QStringList& list, int& cs, LayoutData *dl, int init_state){
+    cs = cs; //not used yet
+    // no verification yet.
+    return new MyGLView(this, list, dl, init_state);
 }
 
 // Getting strings parameters and prepare constructor State

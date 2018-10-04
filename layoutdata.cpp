@@ -81,6 +81,11 @@ void LayoutData::draw_layout(QPainter &painter, QPoint& loffset){
                         cv->hide();
                         cv->drawLayoutObject(painter, loffset);
                     }
+                    if (t == GLVIEW){
+                        MyGLView * cv = (MyGLView*) lo;
+                        cv->setVisible(FALSE);
+                        cv->drawLayoutObject(painter, loffset);
+                    }
                 }
             }
         }
@@ -111,6 +116,11 @@ void LayoutData::draw_layout(QPainter &painter, QPoint& loffset){
         if (t == GCODEVIEW){
             GCodeView * cv = (GCodeView*) lo;
             cv->show();
+            cv->drawLayoutObject(painter, loffset);
+        }
+        if (t == GLVIEW){
+            MyGLView * cv = (MyGLView*) lo;
+            cv->setVisible(TRUE);
             cv->drawLayoutObject(painter, loffset);
         }
     }
@@ -154,6 +164,15 @@ MyLayoutObject * LayoutData::get_layout_object_at_mouse_pos(QPoint pos, int * ty
         if (t == GCODEVIEW){
             //qDebug() << "gcode view found " << sl->elements[i];
             GCodeView * cv = (GCodeView*) lo;
+            if (cv->isCursorOver(pos)) {
+                mlo = lo;
+                *type = t;
+                break;
+            }
+        }
+        if (t == GLVIEW){
+            //qDebug() << "glview view found " << sl->elements[i];
+            MyGLView * cv = (MyGLView*) lo;
             if (cv->isCursorOver(pos)) {
                 mlo = lo;
                 *type = t;
