@@ -63,7 +63,8 @@ GLWidget::GLWidget(QWidget *parent)
       m_zRot(0),
       m_program(0)
 {
-    m_core = QSurfaceFormat::defaultFormat().profile() == QSurfaceFormat::CoreProfile;
+    //m_core = QSurfaceFormat::defaultFormat().profile() == QSurfaceFormat::CoreProfile;
+    m_core = true;
     // --transparent causes the clear color to be transparent. Therefore, on systems that
     // support it, the widget will become transparent apart from the logo.
     if (m_transparent) {
@@ -192,6 +193,19 @@ static const char *fragmentShaderSource =
     "   gl_FragColor = vec4(col, 1.0);\n"
     "}\n";
 
+static const char *my_fragmentShaderSource =
+    "varying highp vec3 vert;\n"
+    "varying highp vec3 vertNormal;\n"
+    "uniform highp vec3 lightPos;\n"
+    "void main() {\n"
+    "   highp vec3 L = normalize(lightPos - vert);\n"
+    "   highp float NL = max(dot(normalize(vertNormal), L), 0.0);\n"
+    "   highp vec3 color = vec3(0.5, 0.0, 1.0);\n"
+    "   highp vec3 col = clamp(color * 0.2 + color * 0.8 * NL, 0.1, 0.5);\n"
+    "   gl_FragColor = vec4(col, 1.0);\n"
+    "}\n";
+
+
 void GLWidget::initializeGL()
 {
     // In this example the widget's corresponding top-level window can change
@@ -208,7 +222,8 @@ void GLWidget::initializeGL()
 
     m_program = new QOpenGLShaderProgram;
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, m_core ? vertexShaderSourceCore : vertexShaderSource);
-    m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, m_core ? fragmentShaderSourceCore : fragmentShaderSource);
+    //m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, m_core ? fragmentShaderSourceCore : fragmentShaderSource);
+    m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, my_fragmentShaderSource);
     m_program->bindAttributeLocation("vertex", 0);
     m_program->bindAttributeLocation("normal", 1);
     m_program->link();
@@ -262,9 +277,17 @@ void GLWidget::paintGL()
     glEnable(GL_CULL_FACE);
 
     m_world.setToIdentity();
+    m_world.translate(0.0,0.0,-1.0); // translation and rotation order does matter!
     m_world.rotate(180.0f - (m_xRot / 16.0f), 1, 0, 0);
     m_world.rotate(m_yRot / 16.0f, 0, 1, 0);
     m_world.rotate(m_zRot / 16.0f, 0, 0, 1);
+
+    m_world1.setToIdentity();
+    //m_world1.translate(0.0,0.0,-1.0); // translation and rotation order does matter!
+    m_world1.rotate(180.0f + (m_xRot / 16.0f), 1, 0, 0);
+    m_world1.rotate(m_yRot / 16.0f, 0, 1, 0);
+    m_world1.rotate(m_zRot / 16.0f, 0, 0, 1);
+
 
     QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao);
     m_program->bind();
@@ -272,6 +295,18 @@ void GLWidget::paintGL()
     m_program->setUniformValue(m_mvMatrixLoc, m_camera * m_world);
     QMatrix3x3 normalMatrix = m_world.normalMatrix();
     m_program->setUniformValue(m_normalMatrixLoc, normalMatrix);
+
+    glDrawArrays(GL_TRIANGLES, 0, m_logo.vertexCount());
+
+    m_program->release();
+
+    // another array
+    QOpenGLVertexArrayObject::Binder vaoBinder1(&m_vao);
+    m_program->bind();
+    m_program->setUniformValue(m_projMatrixLoc, m_proj);
+    m_program->setUniformValue(m_mvMatrixLoc, m_camera * m_world1);
+    QMatrix3x3 normalMatrix1 = m_world1.normalMatrix();
+    m_program->setUniformValue(m_normalMatrixLoc, normalMatrix1);
 
     glDrawArrays(GL_TRIANGLES, 0, m_logo.vertexCount());
 
