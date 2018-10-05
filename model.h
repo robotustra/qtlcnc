@@ -5,18 +5,19 @@
 #undef QT_VERSION_48
 #endif
 
-#if QT_VERSION >= 5
+#if QT_VERSION <= 5
 #define QT_VERSION_48 1
 #else
 #define QT_VERSION_48 0
 #endif
 
 
-#if (QT_VERSION_48)
+//#if (QT_VERSION_48)
 #include <QtOpenGL>
-#else
-#include <qopengl.h>
-#endif
+//#else
+//#include <qopengl.h>
+//#endif
+
 #include <QVector>
 #include <QVector3D>
 

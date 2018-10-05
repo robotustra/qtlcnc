@@ -64,7 +64,7 @@
 
 bool GLWidget::m_transparent = false;
 
-GLWidget::GLWidget(QWidget *parent)
+GLWidget::GLWidget(QWidget *parent, int w, int h)
 #if (QT_VERSION_48)
     : QGLWidget(parent),
 #else
@@ -84,6 +84,15 @@ GLWidget::GLWidget(QWidget *parent)
         fmt.setAlphaBufferSize(8);
         setFormat(fmt);
     }*/
+    w_viewport = w;
+    h_viewport = h;
+}
+
+void GLWidget::setViewPort(int w,int h){
+    w_viewport = w;
+    h_viewport = h;
+    glViewport(0,0,w,h);
+    glOrtho(-1.0,+1.0,-1.0,+1.0,-90.0,+90.0);
 }
 
 GLWidget::~GLWidget()
@@ -91,14 +100,22 @@ GLWidget::~GLWidget()
     cleanup();
 }
 
+#if QT_VERSION_48
+QSize GLWidget::minimumSizeHint()// const
+#else
 QSize GLWidget::minimumSizeHint() const
+#endif
 {
     return QSize(50, 50);
 }
 
+#if QT_VERSION_48
+QSize GLWidget::sizeHint()// const
+#else
 QSize GLWidget::sizeHint() const
+#endif
 {
-    return QSize(300, 300);
+    return QSize(200, 200);
 }
 
 static void qNormalizeAngle(int &angle)
@@ -251,6 +268,7 @@ void GLWidget::initializeGL()
     // can recreate all resources.
 #if (QT_VERSION_48)
 //    connect(context(), &QtOpenGLModule::aboutToBeDestroyed, this, &GLWidget::cleanup);
+    cleanup();
 #else
     connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &GLWidget::cleanup);
 #endif
@@ -264,6 +282,16 @@ void GLWidget::initializeGL()
 
 
     glClearColor(0.25, 0.5, 0, m_transparent ? 0 : 1);
+
+    glViewport(0,0,w_viewport,h_viewport);
+    /* // these lines did not help
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-1.0,+1.0,-1.0,+1.0,-90.0,+90.0);
+    glMatrixMode(GL_MODELVIEW);
+    */
+
+
 #if (QT_VERSION_48)
     m_program = new QGLShaderProgram;
     m_program->addShaderFromSourceCode(QGLShader::Vertex, m_core ? vertexShaderSourceCore : vertexShaderSource);
@@ -327,7 +355,7 @@ void GLWidget::initializeGL()
     // Store the vertex attribute bindings for the program.
     setupVertexAttribs();
 
-    // Our camera never changes in this example.
+    //camera changes in this example.
     m_camera.setToIdentity();
     m_camera.translate(0, 0, -1);
 

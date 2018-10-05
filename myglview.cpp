@@ -27,7 +27,7 @@ MyGLView::MyGLView(MainWindow* p, QStringList &sl, LayoutData *ld, int init_stat
 
     //g_list->addItem(QString("line 1"));
 
-    glWidget = new GLWidget(parent);
+    glWidget = new GLWidget(parent,420,420);
 
     QHBoxLayout *container = new QHBoxLayout;
     container->setContentsMargins(0,0,0,0); // remove border around glview
@@ -82,6 +82,8 @@ void MyGLView::drawLayoutObject(QPainter& painter, QPoint &loffset){
         // set geometry of the glview
         if (parent != NULL && parent->pcwt != NULL ){
             parent->pcwt->setGeometry(x0,y0,sx,sy); // to set position I break layout of the main window
+            glWidget->setViewPort(sx,sy);
+
         }
 
         /*

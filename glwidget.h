@@ -54,17 +54,18 @@
 #include <QMatrix4x4>
 #include "model.h"
 
-
+/*
 #ifdef QT_VERSION_48
 #undef QT_VERSION_48
 #endif
 
 #if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
+*/
 #define QT_VERSION_48 1
-#else
+/*#else
 #define QT_VERSION_48 0
 #endif
-
+*/
 
 #if (QT_VERSION_48)
 #include <QGLWidget>
@@ -97,14 +98,21 @@ class GLWidget : public QOpenGLWidget, protected QOpenGLFunctions
     Q_OBJECT
 
 public:
-    GLWidget(QWidget *parent = 0);
+    GLWidget(QWidget *parent = 0, int w = 300, int h=300);
     ~GLWidget();
+    void setViewPort(int w,int h);
 
     static bool isTransparent() { return m_transparent; }
     static void setTransparent(bool t) { m_transparent = t; }
 
+#if (QT_VERSION_48)
+    QSize minimumSizeHint();
+    QSize sizeHint();
+#else
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
+#endif
+
 
 public slots:
     void setXRotation(int angle);
@@ -118,11 +126,19 @@ signals:
     void zRotationChanged(int angle);
 
 protected:
+#if (QT_VERSION_48)
+    void initializeGL();// override;
+    void paintGL();// override;
+    void resizeGL(int width, int height);// override;
+    void mousePressEvent(QMouseEvent *event);// override;
+    void mouseMoveEvent(QMouseEvent *event);// override;
+#else
     void initializeGL() override;
     void paintGL() override;
     void resizeGL(int width, int height) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
+#endif
 
 private:
     void setupVertexAttribs();
@@ -161,6 +177,8 @@ private:
     QMatrix4x4 m_world;
     QMatrix4x4 m_world1; // exterimental matrix for other model
     static bool m_transparent;
+    int w_viewport;
+    int h_viewport;
 };
 
 #endif
