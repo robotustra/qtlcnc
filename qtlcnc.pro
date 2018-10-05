@@ -6,7 +6,7 @@
 
 QT       += core gui opengl widgets network
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+#greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = qtlcnc
 TEMPLATE = app
@@ -53,4 +53,5 @@ FORMS    += mainwindow.ui
 
 CONFIG += c++11
 
-LIBS += -LC:\Qt\4.8.7\lib\ -lopengl32 -LC:\minwg32\lib
+#LIBS += -LC:\Qt\4.8.7\lib\ -lopengl32 -LC:\minwg32\lib
+LIBS += -LC:\Qt5\5.9\mingw53_32\lib\ -lopengl32 -LC:\minwg32\lib

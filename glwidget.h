@@ -51,7 +51,15 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
-#if QT_VERSION < 0x050000
+#include <QMatrix4x4>
+#include "model.h"
+
+
+#ifdef QT_VERSION_48
+#undef QT_VERSION_48
+#endif
+
+#if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
 #define QT_VERSION_48 1
 #else
 #define QT_VERSION_48 0
@@ -73,14 +81,6 @@
 #include <QOpenGLBuffer>
 #endif
 
-#include <QMatrix4x4>
-#include "model.h"
-
-#if QT_VERSION <= 0x050000
-#define QT_VERSION_48 1
-#else
-#define QT_VERSION_48 0
-#endif
 
 #if (QT_VERSION_48)
 QT_FORWARD_DECLARE_CLASS(QGLShaderProgram)

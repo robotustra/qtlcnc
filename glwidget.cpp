@@ -51,6 +51,7 @@
 #include "glwidget.h"
 #include <QMouseEvent>
 
+
 #if (QT_VERSION_48)
 #include <QtOpenGL/QGLShaderProgram>
 #include <QtOpenGL/QGLContext>
@@ -326,6 +327,16 @@ void GLWidget::initializeGL()
     // Store the vertex attribute bindings for the program.
     setupVertexAttribs();
 
+    // Our camera never changes in this example.
+    m_camera.setToIdentity();
+    m_camera.translate(0, 0, -1);
+
+    // Light position is fixed.
+    //m_program->setUniformValue(m_lightPosLoc, QVector3D(0, 0, 70));
+    //m_program1->setUniformValue(m_lightPosLoc1, QVector3D(0, 0, 70));
+    m_program->setUniformValue(m_lightPosLoc, QVector3D(10, 10, 10));
+    m_program->release();
+
 #if (QT_VERSION_48)
 #else
     m_vao1.create();
@@ -338,7 +349,7 @@ void GLWidget::initializeGL()
 
     // Store the vertex attribute bindings for the program.
     setupVertexAttribs1();
-
+/*
     // Our camera never changes in this example.
     m_camera.setToIdentity();
     m_camera.translate(0, 0, -1);
@@ -348,7 +359,7 @@ void GLWidget::initializeGL()
     //m_program1->setUniformValue(m_lightPosLoc1, QVector3D(0, 0, 70));
     m_program->setUniformValue(m_lightPosLoc, QVector3D(10, 10, 10));
     m_program->release();
-
+*/
     m_program1->setUniformValue(m_lightPosLoc1, QVector3D(10, 10, 10)); // violiet, light is initialazed good
     m_program1->release();
 
@@ -384,10 +395,10 @@ void GLWidget::setupVertexAttribs1()
     QGLFunctions::glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
 #else
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    f->glEnableVertexAttribArray(2);
-    f->glEnableVertexAttribArray(3);
-    f->glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
-    f->glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
+    f->glEnableVertexAttribArray(0);
+    f->glEnableVertexAttribArray(1);
+    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+    f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
 #endif
     m_logoVbo1.release();
 }
@@ -434,6 +445,7 @@ void GLWidget::paintGL()
     m_program->setUniformValue(m_normalMatrixLoc, normalMatrix);
 
     glDrawArrays(GL_TRIANGLES, 0, m_logo.vertexCount());
+    //glDrawArrays(GL_LINES, 0, m_logo.vertexCount());
 
     m_program->release();
 
