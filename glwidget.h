@@ -126,6 +126,7 @@ protected:
 
 private:
     void setupVertexAttribs();
+    void setupVertexAttribs1();
 
     bool m_core;
     int m_xRot;
@@ -136,11 +137,14 @@ private:
 #if (QT_VERSION_48)
     //QGLVertexArrayObject m_vao;
     QGLBuffer m_logoVbo;
+    QGLBuffer m_logoVbo1;
     QGLShaderProgram *m_program;
     QGLShaderProgram *m_program1;
 #else
     QOpenGLVertexArrayObject m_vao;
+    QOpenGLVertexArrayObject m_vao1;
     QOpenGLBuffer m_logoVbo;
+    QOpenGLBuffer m_logoVbo1;
     QOpenGLShaderProgram *m_program;
     QOpenGLShaderProgram *m_program1;
 #endif
