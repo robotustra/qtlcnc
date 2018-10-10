@@ -6,9 +6,9 @@
 #endif
 
 //#if QT_VERSION <= 5
-//#define QT_VERSION_48 1
+#define QT_VERSION_48 1
 //#else
-#define QT_VERSION_48 0
+//#define QT_VERSION_48 0
 //#endif
 
 

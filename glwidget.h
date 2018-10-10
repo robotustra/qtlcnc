@@ -61,7 +61,7 @@
 
 #if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
 */
-#define QT_VERSION_48 0
+#define QT_VERSION_48 1
 /*#else
 #define QT_VERSION_48 0
 #endif

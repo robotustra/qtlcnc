@@ -259,21 +259,35 @@ static const char *my_fragmentShaderSource =
 
 void GLWidget::initializeGL()
 {
-
+#if (QT_VERSION_48)
+    initializeGLFunctions();
+#else
     initializeOpenGLFunctions();
+#endif
 
     glClearColor(0.25, 0.5, 0, 1.0); // not transparent
     glViewport(0,0,w_viewport,h_viewport);
-
+#if (QT_VERSION_48)
+    m_program = new QGLShaderProgram;
+    m_program->addShaderFromSourceCode(QGLShader::Vertex, m_core ? vertexShaderSourceCore : vertexShaderSource);
+    m_program->addShaderFromSourceCode(QGLShader::Fragment, m_core ? fragmentShaderSourceCore : fragmentShaderSource);
+#else
     m_program = new QOpenGLShaderProgram;
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, m_core ? vertexShaderSourceCore : vertexShaderSource);
     m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, m_core ? fragmentShaderSourceCore : fragmentShaderSource);
+#endif
     m_program->link();
+
+#if (QT_VERSION_48)
+    m_program1 = new QGLShaderProgram;
+    m_program1->addShaderFromSourceCode(QGLShader::Vertex, my_vertexShaderSource);
+    m_program1->addShaderFromSourceCode(QGLShader::Fragment, my_fragmentShaderSource);
+#else
     m_program1 = new QOpenGLShaderProgram;
     m_program1->addShaderFromSourceCode(QOpenGLShader::Vertex, my_vertexShaderSource);
     m_program1->addShaderFromSourceCode(QOpenGLShader::Fragment, my_fragmentShaderSource);
+#endif
     m_program1->link();
-
 
     // setup vertex data
 
