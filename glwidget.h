@@ -61,7 +61,7 @@
 
 #if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
 */
-#define QT_VERSION_48 1
+#define QT_VERSION_48 0
 /*#else
 #define QT_VERSION_48 0
 #endif
@@ -141,8 +141,10 @@ protected:
 #endif
 
 private:
-    void setupVertexAttribs();
-    void setupVertexAttribs1();
+    void setupVertexAttribs(const GLuint v, const GLuint n);
+    void setupVertexAttribs1(const GLuint v, const GLuint n);
+    //void setupVertexAttribs();
+    //void setupVertexAttribs1();
 
     bool m_core;
     int m_xRot;
@@ -150,6 +152,7 @@ private:
     int m_zRot;
     QPoint m_lastPos;
     Model m_logo;
+    Model m_logo1;
 #if (QT_VERSION_48)
     //QGLVertexArrayObject m_vao;
     QGLBuffer m_logoVbo;

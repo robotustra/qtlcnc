@@ -220,14 +220,14 @@ static const char *vertexShaderSource =
 static const char *my_vertexShaderSource =
     "attribute vec4 vertex1;\n"
     "attribute vec3 normal1;\n"
-    "varying vec3 vert;\n"
-    "varying vec3 vertNormal;\n"
+    "varying vec3 vert1;\n"
+    "varying vec3 vertNormal1;\n"
     "uniform mat4 projMatrix1;\n"
     "uniform mat4 mvMatrix1;\n"
     "uniform mat3 normalMatrix1;\n"
     "void main() {\n"
-    "   vert = vertex1.xyz;\n"
-    "   vertNormal = normalMatrix1 * normal1;\n"
+    "   vert1 = vertex1.xyz;\n"
+    "   vertNormal1 = normalMatrix1 * normal1;\n"
     "   gl_Position = projMatrix1 * mvMatrix1 * vertex1;\n"
     "}\n";
 
@@ -245,18 +245,49 @@ static const char *fragmentShaderSource =
     "}\n";
 
 static const char *my_fragmentShaderSource =
-    "varying highp vec3 vert;\n"
-    "varying highp vec3 vertNormal;\n"
+    "varying highp vec3 vert1;\n"
+    "varying highp vec3 vertNormal1;\n"
     "uniform highp vec3 lightPos1;\n"
     "void main() {\n"
-    "   highp vec3 L = normalize(lightPos1 - vert);\n"
-    "   highp float NL = max(dot(normalize(vertNormal), L), 0.0);\n"
+    "   highp vec3 L = normalize(lightPos1 - vert1);\n"
+    "   highp float NL = max(dot(normalize(vertNormal1), L), 0.0);\n"
     "   highp vec3 color = vec3(0.4, 0.5, 1.0);\n"
     "   highp vec3 col = clamp(color * 0.2 + color * 0.8 * NL, 0.1, 0.9);\n"
     "   gl_FragColor = vec4(col, 1.0);\n"
     "}\n";
 
 
+void GLWidget::initializeGL()
+{
+
+    initializeOpenGLFunctions();
+
+    glClearColor(0.25, 0.5, 0, 1); // not transparent
+    glViewport(0,0,w_viewport,h_viewport);
+
+    m_program = new QOpenGLShaderProgram;
+    m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, m_core ? vertexShaderSourceCore : vertexShaderSource);
+    m_program->addShaderFromSourceCode(QOpenGLShader::Fragment, m_core ? fragmentShaderSourceCore : fragmentShaderSource);
+    m_program->link();
+    m_program1 = new QOpenGLShaderProgram;
+    m_program1->addShaderFromSourceCode(QOpenGLShader::Vertex, my_vertexShaderSource);
+    m_program1->addShaderFromSourceCode(QOpenGLShader::Fragment, my_fragmentShaderSource);
+    m_program1->link();
+
+    // setup vertex data
+    m_logoVbo.create();
+    m_logoVbo.bind();
+    m_logoVbo.allocate(m_logo.constData(), m_logo.count() * sizeof(GLfloat));
+    m_logoVbo.release();
+
+    m_logoVbo1.create();
+    m_logoVbo1.bind();
+    m_logoVbo1.allocate(m_logo1.constData(), m_logo1.count() * sizeof(GLfloat));
+    m_logoVbo1.release();
+
+}
+
+/*
 void GLWidget::initializeGL()
 {
     // In this example the widget's corresponding top-level window can change
@@ -280,16 +311,8 @@ void GLWidget::initializeGL()
     initializeOpenGLFunctions();
 #endif
 
-
     glClearColor(0.25, 0.5, 0, m_transparent ? 0 : 1);
-
     glViewport(0,0,w_viewport,h_viewport);
-    /* // these lines did not help
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-1.0,+1.0,-1.0,+1.0,-90.0,+90.0);
-    glMatrixMode(GL_MODELVIEW);
-    */
 
 
 #if (QT_VERSION_48)
@@ -373,11 +396,11 @@ void GLWidget::initializeGL()
 
     m_logoVbo1.create();
     m_logoVbo1.bind();
-    m_logoVbo1.allocate(m_logo.constData(), m_logo.count() * sizeof(GLfloat));
+    m_logoVbo1.allocate(m_logo1.constData(), m_logo1.count() * sizeof(GLfloat));
 
     // Store the vertex attribute bindings for the program.
     setupVertexAttribs1();
-/*
+/ *
     // Our camera never changes in this example.
     m_camera.setToIdentity();
     m_camera.translate(0, 0, -1);
@@ -387,60 +410,144 @@ void GLWidget::initializeGL()
     //m_program1->setUniformValue(m_lightPosLoc1, QVector3D(0, 0, 70));
     m_program->setUniformValue(m_lightPosLoc, QVector3D(10, 10, 10));
     m_program->release();
-*/
+* /
     m_program1->setUniformValue(m_lightPosLoc1, QVector3D(10, 10, 10)); // violiet, light is initialazed good
     m_program1->release();
 
 }
+*/
 
-void GLWidget::setupVertexAttribs()
+void GLWidget::setupVertexAttribs(const GLuint v, const GLuint n)
 {
     m_logoVbo.bind();
 #if (QT_VERSION_48)
     //QGLFunctions *f = QGLContext::functions();
-    QGLFunctions::glEnableVertexAttribArray(0);
-    QGLFunctions::glEnableVertexAttribArray(1);
-    QGLFunctions::glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
-    QGLFunctions::glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
+    QGLFunctions::glEnableVertexAttribArray(v);
+    QGLFunctions::glEnableVertexAttribArray(n);
+    QGLFunctions::glVertexAttribPointer(v, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+    QGLFunctions::glVertexAttribPointer(n, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
 #else
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    f->glEnableVertexAttribArray(0);
-    f->glEnableVertexAttribArray(1);
-    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
-    f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
+    f->glEnableVertexAttribArray(v);
+    f->glEnableVertexAttribArray(n);
+    f->glVertexAttribPointer(v, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+    f->glVertexAttribPointer(n, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
 #endif
     m_logoVbo.release();
 }
 
-void GLWidget::setupVertexAttribs1()
+void GLWidget::setupVertexAttribs1(const GLuint v, const GLuint n)
 {
     m_logoVbo1.bind();
 #if (QT_VERSION_48)
     //QGLFunctions *f = QGLContext::functions();
-    QGLFunctions::glEnableVertexAttribArray(2);
-    QGLFunctions::glEnableVertexAttribArray(3);
-    QGLFunctions::glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
-    QGLFunctions::glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
+    QGLFunctions::glEnableVertexAttribArray(v);
+    QGLFunctions::glEnableVertexAttribArray(n);
+    QGLFunctions::glVertexAttribPointer(v, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+    QGLFunctions::glVertexAttribPointer(n, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
 #else
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    f->glEnableVertexAttribArray(2);
-    f->glEnableVertexAttribArray(3);
-    f->glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
-    f->glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
+    f->glEnableVertexAttribArray(v);
+    f->glEnableVertexAttribArray(n);
+    f->glVertexAttribPointer(v, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+    f->glVertexAttribPointer(n, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
 #endif
     m_logoVbo1.release();
 }
 
+void GLWidget::paintGL(){
 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+
+    m_program->bind();
+    m_projMatrixLoc = m_program->uniformLocation("projMatrix");
+    m_mvMatrixLoc = m_program->uniformLocation("mvMatrix");
+    m_normalMatrixLoc = m_program->uniformLocation("normalMatrix");
+    m_lightPosLoc = m_program->uniformLocation("lightPos");
+
+    m_program->setUniformValue(m_lightPosLoc, QVector3D(10, 10, -10));
+
+    m_camera.setToIdentity();
+    m_camera.translate(0, 0, -3);
+    m_camera.rotate(180.0f - (m_xRot / 16.0f), 1, 0, 0);
+    m_camera.rotate(m_yRot / 16.0f, 0, 1, 0);
+    m_camera.rotate(m_zRot / 16.0f, 0, 0, 1);
+
+    m_world.setToIdentity();
+    m_world.translate(0.5,0.5,-1.0);
+
+    m_program->setUniformValue(m_projMatrixLoc, m_proj);
+    m_program->setUniformValue(m_mvMatrixLoc, m_camera * m_world);
+    QMatrix3x3 normalMatrix = m_world.normalMatrix();
+    m_program->setUniformValue(m_normalMatrixLoc, normalMatrix);
+
+    // Find and enable the attribute location for vertex position
+    const GLuint vp = m_program->attributeLocation("vertex");
+    const GLuint nm = m_program->attributeLocation("normal");
+    //glEnableVertexAttribArray(vp);
+    //glEnableVertexAttribArray(nm);
+    setupVertexAttribs(vp, nm);
+
+    glDrawArrays(GL_TRIANGLES, 0, m_logo.vertexCount());
+
+    // Clean up state machine
+    glDisableVertexAttribArray(vp);
+    glDisableVertexAttribArray(nm);
+
+    m_logoVbo.release();
+    m_program->release();
+
+    // another program
+
+    m_program1->bind();
+    m_projMatrixLoc1 = m_program1->uniformLocation("projMatrix1");
+    m_mvMatrixLoc1 = m_program1->uniformLocation("mvMatrix1");
+    m_normalMatrixLoc1 = m_program1->uniformLocation("normalMatrix1");
+    m_lightPosLoc1 = m_program1->uniformLocation("lightPos1");
+
+    m_program1->setUniformValue(m_lightPosLoc1, QVector3D(10, -10, -10));
+
+    m_camera.setToIdentity();
+    m_camera.translate(0, 0, -3);
+    m_camera.rotate(180.0f - (m_xRot / 16.0f), 1, 0, 0);
+    m_camera.rotate(m_yRot / 16.0f, 0, 1, 0);
+    m_camera.rotate(m_zRot / 16.0f, 0, 0, 1);
+
+    m_world1.setToIdentity();
+    m_world1.translate(-0.2,-0.2,-0.3);
+
+    m_program1->setUniformValue(m_projMatrixLoc1, m_proj);
+    m_program1->setUniformValue(m_mvMatrixLoc1, m_camera * m_world1);
+    QMatrix3x3 normalMatrix1 = m_world1.normalMatrix();
+    m_program1->setUniformValue(m_normalMatrixLoc1, normalMatrix1);
+
+    // Find and enable the attribute location for vertex position
+    const GLuint vp1 = m_program1->attributeLocation("vertex1");
+    const GLuint nm1 = m_program1->attributeLocation("normal1");
+    //glEnableVertexAttribArray(vp);
+    //glEnableVertexAttribArray(nm);
+    setupVertexAttribs1(vp1, nm1);
+
+    glDrawArrays(GL_TRIANGLES, 0, m_logo1.vertexCount());
+
+    // Clean up state machine
+    glDisableVertexAttribArray(vp1);
+    glDisableVertexAttribArray(nm1);
+
+    m_logoVbo1.release();
+    m_program1->release();
+
+
+}
+
+/*
 void GLWidget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    GLfloat light_ambient[] = {1.0, 1.0, 1.0 , 0.0 };
-    //glLightfv( GL_LIGHT0, GL_POSITION, light_position);
-    glLightfv( GL_LIGHT0, GL_AMBIENT, light_ambient);
-    glEnable( GL_LIGHT0);
 
     m_world.setToIdentity();   
     m_world.translate(0.5,0.5,-1.0); // translation and rotation order does matter!
@@ -448,7 +555,7 @@ void GLWidget::paintGL()
     m_world.rotate(180.0f - (m_xRot / 16.0f), 1, 0, 0);
     m_world.rotate(m_yRot / 16.0f, 0, 1, 0);
     m_world.rotate(m_zRot / 16.0f, 0, 0, 1);
-    */
+    *-/
 
     // we can rotate and translate camera around the worlds (objects in the world)
 
@@ -465,7 +572,7 @@ void GLWidget::paintGL()
     m_world1.rotate(180.0f + (m_xRot / 16.0f), 1, 0, 0);
     m_world1.rotate(-m_yRot / 16.0f, 0, 1, 0);
     m_world1.rotate(m_zRot / 16.0f, 0, 0, 1);
-    */
+    *-/
 #if (QT_VERSION_48)
 #else
     QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao); // not clear what is it for?
@@ -475,6 +582,8 @@ void GLWidget::paintGL()
     m_program->setUniformValue(m_mvMatrixLoc, m_camera * m_world);
     QMatrix3x3 normalMatrix = m_world.normalMatrix();
     m_program->setUniformValue(m_normalMatrixLoc, normalMatrix);
+
+    setupVertexAttribs();
 
     glDrawArrays(GL_TRIANGLES, 0, m_logo.vertexCount());
     //glDrawArrays(GL_LINES, 0, m_logo.vertexCount());
@@ -492,11 +601,14 @@ void GLWidget::paintGL()
     QMatrix3x3 normalMatrix1 = m_world1.normalMatrix();
     m_program1->setUniformValue(m_normalMatrixLoc1, normalMatrix1);
 
-    glDrawArrays(GL_TRIANGLES, 0, m_logo.vertexCount());
+    setupVertexAttribs1();
+
+    glDrawArrays(GL_TRIANGLES, 0, m_logo1.vertexCount());
 
     m_program1->release();
 
 }
+*/
 
 void GLWidget::resizeGL(int w, int h)
 {

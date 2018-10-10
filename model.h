@@ -5,11 +5,11 @@
 #undef QT_VERSION_48
 #endif
 
-#if QT_VERSION <= 5
-#define QT_VERSION_48 1
-#else
+//#if QT_VERSION <= 5
+//#define QT_VERSION_48 1
+//#else
 #define QT_VERSION_48 0
-#endif
+//#endif
 
 
 //#if (QT_VERSION_48)
