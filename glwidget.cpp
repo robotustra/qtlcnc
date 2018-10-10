@@ -274,29 +274,9 @@ void GLWidget::initializeGL()
     m_program1->addShaderFromSourceCode(QOpenGLShader::Fragment, my_fragmentShaderSource);
     m_program1->link();
 
-<<<<<<< HEAD
-    // get the parameters indexii which are used inside shaders
-    m_program1->bind();
-    m_projMatrixLoc1 = m_program1->uniformLocation("projMatrix1");
-    m_mvMatrixLoc1 = m_program1->uniformLocation("mvMatrix1");
-    m_normalMatrixLoc1 = m_program1->uniformLocation("normalMatrix1");
-    m_lightPosLoc1 = m_program1->uniformLocation("lightPos1");
 
-
-    // Create a vertex array object. In OpenGL ES 2.0 and OpenGL 2.x
-    // implementations this is optional and support may not be present
-    // at all. Nonetheless the below code works in all cases and makes
-    // sure there is a VAO when one is needed.
-#if (QT_VERSION_48)
-#else
-    m_vao.create();
-    QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao);
-#endif
-
-    // Setup our vertex buffer object.
-=======
     // setup vertex data
->>>>>>> 3f0d7ce7f165e9e148e9f7cd34482935043dd1e2
+
     m_logoVbo.create();
     m_logoVbo.bind();
     m_logoVbo.allocate(m_logo.constData(), m_logo.count() * sizeof(GLfloat));
