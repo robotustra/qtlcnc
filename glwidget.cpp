@@ -200,7 +200,7 @@ static const char *fragmentShaderSourceCore =
     "   highp float NL = max(dot(normalize(vertNormal), L), 0.0);\n"
     "   highp vec3 color = vec3(0.39, 1.0, 0.0);\n"
     "   highp vec3 col = clamp(color * 0.2 + color * 0.8 * NL, 0.0, 1.0);\n"
-    "   fragColor = vec4(col, 1.0);\n"
+    "   fragColor = vec4(col, 0.8);\n"
     "}\n";
 
 static const char *vertexShaderSource =
@@ -241,7 +241,7 @@ static const char *fragmentShaderSource =
     "   highp float NL = max(dot(normalize(vertNormal), L), 0.0);\n"
     "   highp vec3 color = vec3(0.39, 1.0, 0.0);\n"
     "   highp vec3 col = clamp(color * 0.2 + color * 0.8 * NL, 0.0, 1.0);\n"
-    "   gl_FragColor = vec4(col, 1.0);\n"
+    "   gl_FragColor = vec4(col, 0.8);\n"
     "}\n";
 
 static const char *my_fragmentShaderSource =
@@ -253,7 +253,7 @@ static const char *my_fragmentShaderSource =
     "   highp float NL = max(dot(normalize(vertNormal1), L), 0.0);\n"
     "   highp vec3 color = vec3(0.4, 0.5, 1.0);\n"
     "   highp vec3 col = clamp(color * 0.2 + color * 0.8 * NL, 0.1, 0.9);\n"
-    "   gl_FragColor = vec4(col, 1.0);\n"
+    "   gl_FragColor = vec4(col, 0.5);\n"
     "}\n";
 
 
@@ -262,7 +262,7 @@ void GLWidget::initializeGL()
 
     initializeOpenGLFunctions();
 
-    glClearColor(0.25, 0.5, 0, 1); // not transparent
+    glClearColor(0.25, 0.5, 0, 1.0); // not transparent
     glViewport(0,0,w_viewport,h_viewport);
 
     m_program = new QOpenGLShaderProgram;
@@ -327,9 +327,11 @@ void GLWidget::setupVertexAttribs1(const GLuint v, const GLuint n)
 
 void GLWidget::paintGL(){
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE); //back side of the object
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // transparancy works for all programs
+    glEnable( GL_BLEND ); //glClearColor(0.0, 0.0, 0, 1.0); // clear color is done once
 
     m_program->bind();
     m_projMatrixLoc = m_program->uniformLocation("projMatrix");
