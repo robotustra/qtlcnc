@@ -347,6 +347,7 @@ void GLWidget::initializeGL()
     m_vao.create();
     QOpenGLVertexArrayObject::Binder vaoBinder(&m_vao);
 #endif
+
     // Setup our vertex buffer object.
     m_logoVbo.create();
     m_logoVbo.bind();
